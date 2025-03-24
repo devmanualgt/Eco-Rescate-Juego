@@ -1,0 +1,29 @@
+/node_modules
+client/node_modules
+server/node_modules
+
+# Dependencias
+**/node_modules/
+.pnpm-store/
+
+# Builds y cachés
+dist/
+.turbo/
+.cache/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs y reportes
+logs/
+*.log
+
+# IDE/Editor
+.idea/
+.vscode/
+.DS_Store
+
+# Otros
+coverage/
