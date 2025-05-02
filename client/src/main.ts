@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { height, width } from './constants/sizes';
+import { DialogueScene } from './scenes/dialog.scene';
 import { BosqueEscena } from './scenes/forest.scene';
 import './style.css';
 
@@ -16,7 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   autoCenter: Phaser.Scale.CENTER_BOTH,
-  scene: [BosqueEscena],
+  scene: [BosqueEscena, DialogueScene],
 };
 
 const game = new Phaser.Game(config);
