@@ -9,6 +9,8 @@ export class BosqueEscena extends Phaser.Scene {
   map!: Phaser.Tilemaps.Tilemap; // Agregar esta propiedad
   layers: Phaser.Tilemaps.TilemapLayer[];
   dialogueTriggers: any;
+  currentOverlappingTriggers: Set<any>;
+
   constructor() {
     super('BosqueEscena');
   }
@@ -116,18 +118,18 @@ export class BosqueEscena extends Phaser.Scene {
           .setAlpha(0) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody & {
           dialogueKey: string;
         };
+        console.log(obj.name);
 
         trigger.dialogueKey = obj.name; // <- Usa el nombre asignado en Tiled
 
-        console.log(trigger);
-
         this.dialogueTriggers.add(trigger);
       });
+      this.currentOverlappingTriggers = new Set();
 
       this.physics.add.overlap(
         this.hero,
         this.dialogueTriggers,
-        () => this.triggerDialogue('Caja1'),
+        (hero, trigger) => this.handleTriggerOverlap(trigger),
         null,
         this
       );
@@ -137,24 +139,46 @@ export class BosqueEscena extends Phaser.Scene {
   update() {
     this.debugHelper.update();
     this.hero.move(this.cursors);
+
+    this.currentOverlappingTriggers.forEach((trigger) => {
+      if (
+        !Phaser.Geom.Intersects.RectangleToRectangle(
+          this.hero.getBounds(),
+          trigger.getBounds()
+        )
+      ) {
+        this.currentOverlappingTriggers.delete(trigger);
+        (trigger as any).used = false;
+      }
+    });
+  }
+
+  handleTriggerOverlap(trigger) {
+    if (!this.currentOverlappingTriggers.has(trigger)) {
+      this.currentOverlappingTriggers.add(trigger);
+      this.triggerDialogue(trigger);
+    }
   }
 
   triggerDialogue(trigger) {
-    const key = (trigger as any).dialogueKey || 'DefaultKey';
-    console.log(key);
+    const key = trigger.dialogueKey || 'DefaultKey';
 
-    console.log(`Activando diálogo: ${trigger}`);
+    if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
+    if ((trigger as any).used) return;
 
-    // 🔹 Aquí puedes tener un archivo con los diálogos predefinidos
+    (trigger as any).used = true;
+
     const dialogues = {
-      Caja1: {
+      box: {
         start: 'Inicio',
         nodes: {
           Inicio: {
+            titulo: '¡Bienvenido!',
+            personaje: 'Hero',
             text: '¡Encontraste una caja misteriosa!',
             options: [
-              { text: 'Hola', next: 'Abrir' },
-              { text: 'two', next: 'Jugar' },
+              { text: 'Salir', next: '' },
+              { text: 'Abrir', next: 'Jugar' },
             ],
           },
           Abrir: {
@@ -162,12 +186,12 @@ export class BosqueEscena extends Phaser.Scene {
             options: [{ text: 'Regresar', next: 'Inicio' }],
           },
           Jugar: {
-            text: 'Dentro hay un mensaje antiguo...',
+            text: '¡Juguemos algo nuevo!',
             options: [{ text: 'Regresar', next: 'Inicio' }],
           },
         },
       },
-      Caja2: {
+      posion: {
         start: 'Inicio',
         nodes: {
           Inicio: {
@@ -178,7 +202,7 @@ export class BosqueEscena extends Phaser.Scene {
       },
     };
 
-    const dialogueData = dialogues[trigger] || {
+    const dialogueData = dialogues[key] || {
       start: 'Inicio',
       nodes: {
         Inicio: {
@@ -188,10 +212,9 @@ export class BosqueEscena extends Phaser.Scene {
       },
     };
 
-    // 🔹 Lanzar la escena de diálogo con la data correspondiente
     this.scene.launch('DialogueScene', {
       dialogueData: dialogueData,
-      startNode: 'Inicio',
+      startNode: dialogueData.start,
     });
   }
 }

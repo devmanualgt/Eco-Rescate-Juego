@@ -4,11 +4,9 @@ export class DialogueScene extends Phaser.Scene {
   dialogueData: any;
   currentNode: any;
   dialogueBox: Phaser.GameObjects.Graphics;
-  dialogueTitle: Phaser.GameObjects.Text;
-  characterNameText: Phaser.GameObjects.Text;
   dialogueText: Phaser.GameObjects.Text;
+  characterNameText: Phaser.GameObjects.Text;
   optionButtons: Phaser.GameObjects.Group;
-  characterIndicator: Phaser.GameObjects.Arc;
 
   textSpeed: number;
   currentTextEvent: Phaser.Time.TimerEvent | null;
@@ -43,18 +41,14 @@ export class DialogueScene extends Phaser.Scene {
     this.dialogueBox.fillStyle(0x000000, 0.8);
     this.dialogueBox.fillRoundedRect(50, height - 170, width - 100, 150, 10);
 
-    // Indicador visual del personaje (círculo)
-    this.characterIndicator = this.add.circle(70, height - 140, 10, 0xffffff); // blanco por defecto
-
-    // Texto del nombre del personaje
-    this.characterNameText = this.add.text(100, height - 150, '', {
-      fontSize: '20px',
+    this.characterNameText = this.add.text(70, height - 140, '', {
+      fontSize: '18px',
       color: '#fff',
-      wordWrap: { width: width - 140 },
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
     });
 
-    // Texto del diálogo
-    this.dialogueText = this.add.text(120, height - 120, '', {
+    this.dialogueText = this.add.text(70, height - 120, '', {
       fontSize: '18px',
       color: '#ffffff',
       wordWrap: { width: width - 140 },
@@ -68,7 +62,7 @@ export class DialogueScene extends Phaser.Scene {
     if (!node) return;
 
     this.currentNode = nodeKey;
-    this.characterNameText.setText(node.personaje || '');
+    this.characterNameText.setText(this.dialogueData.character || '');
     this.optionButtons.clear(true, true);
 
     // Cancelar texto anterior si se está escribiendo
@@ -107,11 +101,7 @@ export class DialogueScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-          if (option.next === '') {
-            this.scene.stop(); // Cierra el diálogo
-          } else {
-            this.showDialogueNode(option.next);
-          }
+          this.showDialogueNode(option.next);
         });
 
       this.optionButtons.addMultiple([buttonBg, buttonText]);
