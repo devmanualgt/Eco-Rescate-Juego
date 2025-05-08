@@ -8,6 +8,10 @@ export class BosqueEscena extends Phaser.Scene {
   debugHelper: DebugHelper;
   map!: Phaser.Tilemaps.Tilemap; // Agregar esta propiedad
   layers: Phaser.Tilemaps.TilemapLayer[];
+
+  private soundCaminar!: Phaser.Sound.BaseSound;
+  private musicaFondo!: Phaser.Sound.BaseSound;
+
   constructor() {
     super('BosqueEscena');
   }
@@ -25,9 +29,26 @@ export class BosqueEscena extends Phaser.Scene {
       textureURL: 'assets/sprites/hero-frames.png',
       atlasURL: 'assets/sprites/hero-frames.json',
     });
+
+    // CARGA DEL SONIDO DE CAMINAR (ogg + mp3)
+    this.load.audio('caminar', [
+      'assets/audio/ogg/leavesWalk01.ogg',
+      'assets/audio/mp3/leavesWalk01.mp3',
+    ]);
+
+    this.load.audio('musicaFondo', [
+      'assets/audio/ogg/intro.ogg',
+      'assets/audio/mp3/intro.mp3',
+    ]);
   }
 
   create() {
+    this.musicaFondo = this.sound.add('musicaFondo', {
+      loop: true,
+      volume: 0.2, // ajusta según necesidad
+    });
+    this.musicaFondo.play();
+
     const map = this.make.tilemap({ key: 'forest' });
     const tileset = map.addTilesetImage('map', 'map');
 
@@ -83,12 +104,27 @@ export class BosqueEscena extends Phaser.Scene {
     if (this.layers[5]) this.physics.add.collider(this.hero, this.layers[5]);
 
     this.debugHelper = new DebugHelper(this, this.layers);
+
+    // INICIALIZAR sonido de caminar
+    this.soundCaminar = this.sound.add('caminar', { volume: 0.3 });
   }
 
   update() {
     this.debugHelper.update();
 
     this.hero.move(this.cursors);
+
+    // DETECTAR movimiento y reproducir sonido
+    if (
+      this.cursors.left.isDown ||
+      this.cursors.right.isDown ||
+      this.cursors.up.isDown ||
+      this.cursors.down.isDown
+    ) {
+      if (!this.soundCaminar.isPlaying) {
+        this.soundCaminar.play();
+      }
+    }
   }
 
   drawGrid() {
