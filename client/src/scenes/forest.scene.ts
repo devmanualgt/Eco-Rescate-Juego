@@ -6,7 +6,7 @@ export class BosqueEscena extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   hero!: Hero;
   debugHelper: DebugHelper;
-  map!: Phaser.Tilemaps.Tilemap; // Agregar esta propiedad
+  map!: Phaser.Tilemaps.Tilemap;
   layers: Phaser.Tilemaps.TilemapLayer[];
 
   private soundCaminar!: Phaser.Sound.BaseSound;
@@ -30,7 +30,6 @@ export class BosqueEscena extends Phaser.Scene {
       atlasURL: 'assets/sprites/hero-frames.json',
     });
 
-    // CARGA DEL SONIDO DE CAMINAR (ogg + mp3)
     this.load.audio('caminar', [
       'assets/audio/ogg/leavesWalk01.ogg',
       'assets/audio/mp3/leavesWalk01.mp3',
@@ -45,7 +44,7 @@ export class BosqueEscena extends Phaser.Scene {
   create() {
     this.musicaFondo = this.sound.add('musicaFondo', {
       loop: true,
-      volume: 0.2, // ajusta según necesidad
+      volume: 1,
     });
     this.musicaFondo.play();
 
@@ -53,12 +52,12 @@ export class BosqueEscena extends Phaser.Scene {
     const tileset = map.addTilesetImage('map', 'map');
 
     this.layers = [
-      map.createLayer('water', tileset, 0, 0)?.setScale(2.5)!, // 0
-      map.createLayer('land', tileset, 0, 0)?.setScale(2.5)!, // 1
-      map.createLayer('tree0', tileset, 0, 0)?.setScale(2.5)!, // 2
-      map.createLayer('tree1', tileset, 0, 0)?.setScale(2.5)!, // 3
-      map.createLayer('tree2', tileset, 0, 0)?.setScale(2.5)!, // 4
-      map.createLayer('boxes', tileset, 0, 0)?.setScale(2.5)!, // 5
+      map.createLayer('water', tileset, 0, 0)?.setScale(2.5)!,
+      map.createLayer('land', tileset, 0, 0)?.setScale(2.5)!,
+      map.createLayer('tree0', tileset, 0, 0)?.setScale(2.5)!,
+      map.createLayer('tree1', tileset, 0, 0)?.setScale(2.5)!,
+      map.createLayer('tree2', tileset, 0, 0)?.setScale(2.5)!,
+      map.createLayer('boxes', tileset, 0, 0)?.setScale(2.5)!,
     ];
 
     this.anims.createFromAseprite('hero', [
@@ -105,33 +104,37 @@ export class BosqueEscena extends Phaser.Scene {
 
     this.debugHelper = new DebugHelper(this, this.layers);
 
-    // INICIALIZAR sonido de caminar
-    this.soundCaminar = this.sound.add('caminar', { volume: 0.3 });
+    this.soundCaminar = this.sound.add('caminar', { volume: 5 });
+    console.log('Sonido caminar cargado:', this.soundCaminar);
+
+    this.createSoundUI();
   }
 
   update() {
     this.debugHelper.update();
-
     this.hero.move(this.cursors);
 
-    // DETECTAR movimiento y reproducir sonido
-    if (
+    const moviendo =
       this.cursors.left.isDown ||
       this.cursors.right.isDown ||
       this.cursors.up.isDown ||
-      this.cursors.down.isDown
-    ) {
+      this.cursors.down.isDown;
+
+    if (moviendo) {
       if (!this.soundCaminar.isPlaying) {
-        this.soundCaminar.play();
+        this.soundCaminar.play({ loop: true });
+      }
+    } else {
+      if (this.soundCaminar.isPlaying) {
+        this.soundCaminar.stop();
       }
     }
   }
 
   drawGrid() {
     const graphics = this.add.graphics();
-    graphics.lineStyle(1, 0xffffff, 0.3); // Líneas blancas con transparencia
-
-    const tileSize = 16 * 2.5; // Ajustar según el tamaño del tile y el escalado
+    graphics.lineStyle(1, 0xffffff, 0.3);
+    const tileSize = 16 * 2.5;
     const width = this.scale.width;
     const height = this.scale.height;
 
@@ -146,5 +149,58 @@ export class BosqueEscena extends Phaser.Scene {
     }
 
     graphics.strokePath();
+  }
+
+  private createSoundUI() {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.top = '20px';
+    container.style.left = '20px';
+    container.style.background = 'rgba(0, 0, 0, 0.6)';
+    container.style.padding = '12px';
+    container.style.borderRadius = '10px';
+    container.style.color = 'white';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.fontSize = '14px';
+    container.style.zIndex = '1000';
+
+    const volMusica = (this.musicaFondo as Phaser.Sound.WebAudioSound).volume;
+    const volAmbiente = (this.soundCaminar as Phaser.Sound.WebAudioSound)
+      .volume;
+
+    container.innerHTML = `
+      <label style="display:block; margin-bottom: 10px;">🎵 Música de Fondo:
+        <input type="range" id="musicSlider" min="0" max="1" step="0.01" value="${volMusica}">
+      </label>
+      <label style="display:block;">🌿 Sonido Ambiental:
+        <input type="range" id="ambientSlider" min="0" max="1" step="0.01" value="${volAmbiente}">
+      </label>
+    `;
+
+    document.body.appendChild(container);
+
+    const musicSlider = container.querySelector(
+      '#musicSlider'
+    ) as HTMLInputElement;
+    const ambientSlider = container.querySelector(
+      '#ambientSlider'
+    ) as HTMLInputElement;
+
+    musicSlider.addEventListener('input', () => {
+      (this.musicaFondo as Phaser.Sound.WebAudioSound).setVolume(
+        parseFloat(musicSlider.value)
+      );
+    });
+
+    ambientSlider.addEventListener('input', () => {
+      (this.soundCaminar as Phaser.Sound.WebAudioSound).setVolume(
+        parseFloat(ambientSlider.value)
+      );
+    });
+
+    this.input.keyboard.on('keydown-M', () => {
+      container.style.display =
+        container.style.display === 'none' ? 'block' : 'none';
+    });
   }
 }
