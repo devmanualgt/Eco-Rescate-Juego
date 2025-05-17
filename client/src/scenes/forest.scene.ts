@@ -196,7 +196,7 @@ export class BosqueEscena extends Phaser.Scene {
         nodes: {
           Inicio: {
             text: 'Parece que esta caja está bloqueada.',
-            options: [{ text: 'Regresar', next: 'Inicio' }],
+            options: [{ text: 'Regresar', next: '' }],
           },
         },
       },
