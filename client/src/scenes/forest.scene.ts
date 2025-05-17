@@ -6,10 +6,12 @@ export class BosqueEscena extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   hero!: Hero;
   debugHelper: DebugHelper;
-  map!: Phaser.Tilemaps.Tilemap; // Agregar esta propiedad
+  map!: Phaser.Tilemaps.Tilemap;
   layers: Phaser.Tilemaps.TilemapLayer[];
   dialogueTriggers: any;
   currentOverlappingTriggers: Set<any>;
+  private soundCaminar!: Phaser.Sound.BaseSound;
+  private musicaFondo!: Phaser.Sound.BaseSound;
 
   constructor() {
     super('BosqueEscena');
@@ -28,9 +30,25 @@ export class BosqueEscena extends Phaser.Scene {
       textureURL: 'assets/sprites/hero-frames.png',
       atlasURL: 'assets/sprites/hero-frames.json',
     });
+
+    this.load.audio('caminar', [
+      'assets/audio/ogg/leavesWalk01.ogg',
+      'assets/audio/mp3/leavesWalk01.mp3',
+    ]);
+
+    this.load.audio('musicaFondo', [
+      'assets/audio/ogg/intro.ogg',
+      'assets/audio/mp3/intro.mp3',
+    ]);
   }
 
   create() {
+    this.musicaFondo = this.sound.add('musicaFondo', {
+      loop: true,
+      volume: 1,
+    });
+    this.musicaFondo.play();
+
     const map = this.make.tilemap({ key: 'forest' });
     const tileset = map.addTilesetImage('map', 'map');
 
@@ -134,6 +152,13 @@ export class BosqueEscena extends Phaser.Scene {
         this
       );
     }
+
+    this.debugHelper = new DebugHelper(this, this.layers);
+
+    this.soundCaminar = this.sound.add('caminar', { volume: 10 });
+    console.log('Sonido caminar cargado:', this.soundCaminar);
+
+    this.createSoundUI();
   }
 
   update() {
@@ -151,6 +176,22 @@ export class BosqueEscena extends Phaser.Scene {
         (trigger as any).used = false;
       }
     });
+
+    const moviendo =
+      this.cursors.left.isDown ||
+      this.cursors.right.isDown ||
+      this.cursors.up.isDown ||
+      this.cursors.down.isDown;
+
+    if (moviendo) {
+      if (!this.soundCaminar.isPlaying) {
+        this.soundCaminar.play({ loop: true });
+      }
+    } else {
+      if (this.soundCaminar.isPlaying) {
+        this.soundCaminar.stop();
+      }
+    }
   }
 
   handleTriggerOverlap(trigger) {
@@ -215,6 +256,59 @@ export class BosqueEscena extends Phaser.Scene {
     this.scene.launch('DialogueScene', {
       dialogueData: dialogueData,
       startNode: dialogueData.start,
+    });
+  }
+
+  private createSoundUI() {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.top = '20px';
+    container.style.left = '20px';
+    container.style.background = 'rgba(0, 0, 0, 0.6)';
+    container.style.padding = '12px';
+    container.style.borderRadius = '10px';
+    container.style.color = 'white';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.fontSize = '14px';
+    container.style.zIndex = '1000';
+
+    const volMusica = (this.musicaFondo as Phaser.Sound.WebAudioSound).volume;
+    const volAmbiente = (this.soundCaminar as Phaser.Sound.WebAudioSound)
+      .volume;
+
+    container.innerHTML = `
+      <label style="display:block; margin-bottom: 10px;">🎵 Música de Fondo:
+        <input type="range" id="musicSlider" min="0" max="1" step="0.01" value="${volMusica}">
+      </label>
+      <label style="display:block;">🌿 Sonido Ambiental:
+        <input type="range" id="ambientSlider" min="0" max="1" step="0.01" value="${volAmbiente}">
+      </label>
+    `;
+
+    document.body.appendChild(container);
+
+    const musicSlider = container.querySelector(
+      '#musicSlider'
+    ) as HTMLInputElement;
+    const ambientSlider = container.querySelector(
+      '#ambientSlider'
+    ) as HTMLInputElement;
+
+    musicSlider.addEventListener('input', () => {
+      (this.musicaFondo as Phaser.Sound.WebAudioSound).setVolume(
+        parseFloat(musicSlider.value)
+      );
+    });
+
+    ambientSlider.addEventListener('input', () => {
+      (this.soundCaminar as Phaser.Sound.WebAudioSound).setVolume(
+        parseFloat(ambientSlider.value)
+      );
+    });
+
+    this.input.keyboard.on('keydown-M', () => {
+      container.style.display =
+        container.style.display === 'none' ? 'block' : 'none';
     });
   }
 }
