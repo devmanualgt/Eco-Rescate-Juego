@@ -14,7 +14,7 @@ export class BosqueEscena extends Phaser.Scene {
   private musicaFondo!: Phaser.Sound.BaseSound;
 
   constructor() {
-    super('BosqueEscena');
+    super({ key: 'BosqueEscena' });
   }
 
   preload() {

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { dialogues } from '../utils/dialog';
+import { SceneManager } from '../utils/scene.manager';
 
 export class DialogueScene extends Phaser.Scene {
   dialogueData: any;
@@ -113,9 +114,8 @@ export class DialogueScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
           if (option.scena) {
-            console.log('Escena:', option.scena);
-
-            this.scene.start(option.next);
+            const manager = SceneManager.getInstance(this);
+            manager.transitionTo('BosqueEscena', option.next, 'fade', 500);
           } else {
             if (option.next === '') {
               console.log('close');
