@@ -8,7 +8,7 @@ export const dialogues = () => ({
         text: '¡Encontraste una caja misteriosa!',
         options: [
           { text: 'Salir', next: '' },
-          { text: 'Abrir', next: 'VidasEscena', scena: true },
+          { text: 'Abrir', next: 'CutTrashScene', scena: true },
         ],
       },
       Abrir: {

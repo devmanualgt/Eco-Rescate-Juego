@@ -19,7 +19,7 @@ export class BosqueEscena extends Phaser.Scene {
   private teclaL!: Phaser.Input.Keyboard.Key;
 
   constructor() {
-    super('BosqueEscena');
+    super({ key: 'BosqueEscena' });
   }
 
   preload() {
@@ -112,6 +112,17 @@ export class BosqueEscena extends Phaser.Scene {
 
     this.anims.get('respirar').repeat = -1;
 
+    // 🦸‍♂️ Crear el héroe después de cargar las capas
+    this.hero = new Hero(this, 512, 384);
+
+    // 🔹 Agregar colisiones solo si la capa existe
+    Object.values(this.layers).forEach((layer) => {
+      if (layer.layer.name === 'water') {
+      }
+      if (layer) this.physics.add.collider(this.hero, layer);
+    });
+
+    // 🎥 Configurar cámara
     this.cursors = this.input.keyboard.createCursorKeys();
     this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
@@ -172,6 +183,9 @@ export class BosqueEscena extends Phaser.Scene {
     this.debugHelper.update();
     this.hero.move(this.cursors);
 
+    const triggersToRemove: any[] = [];
+
+    // Verifica qué triggers ya no colisionan
     this.currentOverlappingTriggers.forEach((trigger) => {
       if (
         !Phaser.Geom.Intersects.RectangleToRectangle(
@@ -179,11 +193,27 @@ export class BosqueEscena extends Phaser.Scene {
           trigger.getBounds()
         )
       ) {
-        this.currentOverlappingTriggers.delete(trigger);
-        (trigger as any).used = false;
+        triggersToRemove.push(trigger);
       }
     });
 
+    // Elimina los triggers no colisionados
+    triggersToRemove.forEach((trigger) => {
+      this.currentOverlappingTriggers.delete(trigger);
+      (trigger as any).used = false;
+
+      // Si ya no hay ningún trigger activo, detén el diálogo
+      if (this.currentOverlappingTriggers.size === 0) {
+        if (this.scene.isActive('DialogueScene')) {
+          this.scene.stop('DialogueScene');
+          console.log(
+            '🛑 DialogueScene detenido por salida de todos los triggers'
+          );
+        }
+      }
+    });
+
+    // Control de sonido caminar
     const moviendo =
       this.cursors.left.isDown ||
       this.cursors.right.isDown ||

@@ -9,7 +9,9 @@ export class Hero extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     this.setScale(3);
-    this.play('respirar');
+    //this.play('respirar');
+    //this.anims.get('respirar').repeat = -1;
+    this.play('respirar', true);
 
     this.setCollideWorldBounds(true);
   }
