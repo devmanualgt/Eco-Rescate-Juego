@@ -3,6 +3,7 @@ import { height, width } from './constants/sizes';
 import { CutTrashScene } from './scenes/cut.trash.scene';
 import { DialogueScene } from './scenes/dialog.scene';
 import { BosqueEscena } from './scenes/forest.scene';
+import { LifeScene } from './scenes/life.scene';
 import './style.css';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -18,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   autoCenter: Phaser.Scale.CENTER_BOTH,
-  scene: [BosqueEscena, DialogueScene, CutTrashScene],
+  scene: [BosqueEscena, DialogueScene, LifeScene, CutTrashScene],
 };
 
 new Phaser.Game(config);
