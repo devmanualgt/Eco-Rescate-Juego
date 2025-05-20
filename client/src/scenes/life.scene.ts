@@ -1,68 +1,87 @@
-import 'phaser';
+import Phaser from 'phaser';
+import Swal from 'sweetalert2';
 
 export class LifeScene extends Phaser.Scene {
-    private lives!: number;
-    private heartImages: Phaser.GameObjects.Image[] = [];
-    private tecla!: Phaser.Input.Keyboard.Key;
-    
+  hero: any;
+  lives: number = 3;
+  heartImages: Phaser.GameObjects.Image[] = [];
+  private teclaL!: Phaser.Input.Keyboard.Key;
+  currentOverlappingTriggers: Set<any>;
 
-    constructor() {
-        super({ key: 'LifeScene',active:false });
-       
+  constructor() {
+    super({ key: 'LifeScene' });
+  }
+
+  init(data) {
+    this.hero = data.hero;
+    this.lives = data.lives || 3;
+    this.heartImages = [];
+  }
+
+  preload() {
+    // Cargar cualquier asset adicional aquí
+  }
+
+  create() {
+    for (let i = 0; i < this.lives; i++) {
+      const heart = this.add
+        .image(750 - i * 40, 30, 'vida_fondo')
+        .setScrollFactor(0)
+        .setDepth(100)
+        .setScale(0.5)
+        .setOrigin(0.5);
+      this.heartImages.push(heart);
+    }
+    this.currentOverlappingTriggers = new Set();
+    this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
+  }
+
+  update() {
+    this.currentOverlappingTriggers.forEach((trigger) => {
+      if (
+        !Phaser.Geom.Intersects.RectangleToRectangle(
+          this.hero.getBounds(),
+          trigger.getBounds()
+        )
+      ) {
+        this.currentOverlappingTriggers.delete(trigger);
+        (trigger as any).used = false;
+      }
+    });
+
+    if (Phaser.Input.Keyboard.JustDown(this.teclaL)) {
+      this.perderVida();
+    }
+  }
+
+  perderVida() {
+    if (this.lives > 0) {
+      this.lives--;
+      // Cambiar el color del corazón perdido a negro
+      this.heartImages[this.lives].setTint(0x000000);
+      this.cameras.main.shake(100, 0.02);
     }
 
-    preload() {
-        this.load.image('heart', 'assets/heart.png');
-        this.load.image('tiles', 'assets/tileset.png');
-        this.load.image('character', 'assets/player.png');
-        // Cargar cualquier asset adicional aquí
-    }
-
-    create() {
-        this.lives = 3;
-
-       
-
-        // Crear corazones en HUD (esquina superior izquierda por ejemplo)
-        for (let i = 0; i < this.lives; i++) {
-            const heart = this.add.image(750 - (i * 40), 30, 'heart')
-                .setScrollFactor(0)     //  Fijar en pantalla
-                .setDepth(100)          // Asegurar que estén al frente
-                .setScale(0.5)
-                .setOrigin(0.5);
-            this.heartImages.push(heart);
+    if (this.lives <= 0) {
+      Swal.fire({
+        title: '¡Game Over!',
+        text: '¿Quieres reiniciar el juego?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Reiniciar',
+        cancelButtonText: 'Salir',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.lives = 3;
+          // Restaurar corazones: quitar tinte y hacer visibles
+          this.heartImages.forEach((h) => {
+            h.setVisible(true);
+            h.clearTint();
+          });
+        } else {
+          this.game.destroy(true);
         }
-
-        // Tecla para simular pérdida de vida
-        this.tecla = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
+      });
     }
-
-    update() {
-        if (Phaser.Input.Keyboard.JustDown(this.tecla)) {
-            if (this.lives > 0) {
-                this.lives--;
-                this.heartImages[this.lives].setVisible(false);
-                this.cameras.main.shake(100, 0.02);
-            }
-
-            if (this.lives <= 0) {
-                const reiniciar = confirm('¡Game Over! ¿Quieres reiniciar?');
-                if (reiniciar) {
-                    this.lives = 3;
-                    this.heartImages.forEach(h => h.setVisible(true));
-                } else {
-                    this.game.destroy(true);
-                }
-            }
-        }
-    }
+  }
 }
-
-const config: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scene: [LifeScene]
-};
-
-new Phaser.Game(config);
