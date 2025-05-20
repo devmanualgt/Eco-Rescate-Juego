@@ -100,16 +100,6 @@ export class BosqueEscena extends Phaser.Scene {
 
     this.anims.get('respirar').repeat = -1;
 
-    // 🦸‍♂️ Crear el héroe después de cargar las capas
-    this.hero = new Hero(this, 512, 384);
-
-    // 🔹 Agregar colisiones solo si la capa existe
-    Object.values(this.layers).forEach((layer) => {
-      if (layer.layer.name === 'water') {
-      }
-      if (layer) this.physics.add.collider(this.hero, layer);
-    });
-
     // 🎥 Configurar cámara
     this.cursors = this.input.keyboard.createCursorKeys();
 
