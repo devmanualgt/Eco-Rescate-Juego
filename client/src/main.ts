@@ -20,4 +20,4 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [BosqueEscena, DialogueScene],
 };
 
-const game = new Phaser.Game(config);
+new Phaser.Game(config);
