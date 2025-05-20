@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
+import { dialogues } from '../utils/dialog';
 
 export class DialogueScene extends Phaser.Scene {
   dialogueData: any;
   currentNode: any;
+  trigger: any;
   dialogueBox: Phaser.GameObjects.Graphics;
   dialogueTitle: Phaser.GameObjects.Text;
   characterNameText: Phaser.GameObjects.Text;
@@ -19,6 +21,7 @@ export class DialogueScene extends Phaser.Scene {
 
     this.dialogueData = null;
     this.currentNode = null;
+    this.trigger = null;
 
     this.textSpeed = 25; // Velocidad de escritura (ms por letra)
     this.currentTextEvent = null;
@@ -26,8 +29,10 @@ export class DialogueScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.dialogueData = data.dialogueData || {};
-    this.currentNode = data.startNode || 'start';
+    this.trigger = dialogues()[data.trigger];
+
+    this.dialogueData = this.trigger || {};
+    this.currentNode = this.trigger.start || 'start';
   }
 
   create() {
@@ -107,10 +112,18 @@ export class DialogueScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-          if (option.next === '') {
-            this.scene.stop(); // Cierra el diálogo
+          if (option.scena) {
+            console.log('Escena:', option.scena);
+
+            this.scene.start(option.next);
           } else {
-            this.showDialogueNode(option.next);
+            if (option.next === '') {
+              console.log('close');
+
+              this.scene.stop(); // Cierra el diálogo
+            } else {
+              this.showDialogueNode(option.next);
+            }
           }
         });
 

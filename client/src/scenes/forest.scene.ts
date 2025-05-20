@@ -250,52 +250,8 @@ export class BosqueEscena extends Phaser.Scene {
     if ((trigger as any).used) return;
 
     (trigger as any).used = true;
-    const dialogues = {
-      box: {
-        start: 'Inicio',
-        nodes: {
-          Inicio: {
-            titulo: '¡Bienvenido!',
-            personaje: 'Hero',
-            text: '¡Encontraste una caja misteriosa!',
-            options: [
-              { text: 'Salir', next: '' },
-              { text: 'Abrir', next: 'Jugar' },
-            ],
-          },
-          Abrir: {
-            text: 'Dentro hay un mensaje antiguo...',
-            options: [{ text: 'Regresar', next: 'Inicio' }],
-          },
-          Jugar: {
-            text: '¡Juguemos algo nuevo!',
-            options: [{ text: 'Regresar', next: 'Inicio' }],
-          },
-        },
-      },
-      posion: {
-        start: 'Inicio',
-        nodes: {
-          Inicio: {
-            text: 'Parece que esta caja está bloqueada.',
-            options: [{ text: 'Regresar', next: '' }],
-          },
-        },
-      },
-    };
-
-    const dialogueData = dialogues[key] || {
-      start: 'Inicio',
-      nodes: {
-        Inicio: {
-          text: 'Este objeto no tiene diálogo asignado.',
-          options: [{ text: 'Ok', next: 'Inicio' }],
-        },
-      },
-    };
     this.scene.launch('DialogueScene', {
-      dialogueData: dialogueData,
-      startNode: dialogueData.start,
+      trigger: key,
     });
   }
 
