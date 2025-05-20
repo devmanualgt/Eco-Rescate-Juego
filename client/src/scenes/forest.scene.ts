@@ -83,8 +83,6 @@ export class BosqueEscena extends Phaser.Scene {
       }
     });
 
-    this.hero = new Hero(this, 512, 384);
-
     // Crear corazones (vivos = rojos)
     for (let i = 0; i < this.lives; i++) {
       const heart = this.add
@@ -96,10 +94,6 @@ export class BosqueEscena extends Phaser.Scene {
       this.heartImages.push(heart);
     }
 
-    Object.values(this.layers).forEach((layer) => {
-      if (layer) this.physics.add.collider(this.hero, layer);
-    });
-
     this.anims.createFromAseprite('hero', [
       'respirar',
       'respirar-right',
@@ -110,6 +104,12 @@ export class BosqueEscena extends Phaser.Scene {
       'walk-front',
       'walk-back',
     ]);
+
+    this.hero = new Hero(this, 512, 384);
+    Object.values(this.layers).forEach((layer) => {
+      if (layer) this.physics.add.collider(this.hero, layer);
+    });
+
     this.anims.get('respirar').repeat = -1;
 
     this.cursors = this.input.keyboard.createCursorKeys();
