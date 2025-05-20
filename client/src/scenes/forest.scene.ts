@@ -8,17 +8,15 @@ export class BosqueEscena extends Phaser.Scene {
   hero!: Hero;
   debugHelper: DebugHelper;
   map!: Phaser.Tilemaps.Tilemap;
-  layers: Phaser.Tilemaps.TilemapLayer[];
+  layers: Phaser.Tilemaps.TilemapLayer[] = [];
   dialogueTriggers: any;
   currentOverlappingTriggers: Set<any>;
   private soundCaminar!: Phaser.Sound.BaseSound;
   private musicaFondo!: Phaser.Sound.BaseSound;
 
-
   lives: number = 3;
   heartImages: Phaser.GameObjects.Image[] = [];
   private teclaL!: Phaser.Input.Keyboard.Key;
-
 
   constructor() {
     super('BosqueEscena');
@@ -31,14 +29,13 @@ export class BosqueEscena extends Phaser.Scene {
     });
 
     this.load.tilemapTiledJSON('forest', 'assets/tilemaps/map01.json');
-    this.load.image('heart', 'assets/heart.png');
 
     this.load.aseprite({
       key: 'hero',
       textureURL: 'assets/sprites/hero-frames.png',
       atlasURL: 'assets/sprites/hero-frames.json',
     });
-      this.load.audio('caminar', [
+    this.load.audio('caminar', [
       'assets/audio/ogg/leavesWalk01.ogg',
       'assets/audio/mp3/leavesWalk01.mp3',
     ]);
@@ -77,7 +74,10 @@ export class BosqueEscena extends Phaser.Scene {
           if (Array.isArray(config.collision)) {
             layer.setCollision(config.collision);
           } else {
-            layer.setCollisionBetween(config.collision.start, config.collision.end);
+            layer.setCollisionBetween(
+              config.collision.start,
+              config.collision.end
+            );
           }
         }
       }
@@ -87,7 +87,8 @@ export class BosqueEscena extends Phaser.Scene {
 
     // Crear corazones (vivos = rojos)
     for (let i = 0; i < this.lives; i++) {
-      const heart = this.add.image(750 - i * 40, 30, 'vida_fondo')
+      const heart = this.add
+        .image(750 - i * 40, 30, 'vida_fondo')
         .setScrollFactor(0)
         .setDepth(100)
         .setScale(0.5)
@@ -114,9 +115,19 @@ export class BosqueEscena extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
-    this.cameras.main.setBounds(0, 0, map.widthInPixels * 2.5, map.heightInPixels * 2.45);
+    this.cameras.main.setBounds(
+      0,
+      0,
+      map.widthInPixels * 2.5,
+      map.heightInPixels * 2.45
+    );
     this.cameras.main.startFollow(this.hero);
-    this.physics.world.setBounds(0, 0, map.widthInPixels * 2.5, map.heightInPixels * 2.45);
+    this.physics.world.setBounds(
+      0,
+      0,
+      map.widthInPixels * 2.5,
+      map.heightInPixels * 2.45
+    );
 
     this.debugHelper = new DebugHelper(this, Object.values(this.layers));
 
@@ -161,7 +172,6 @@ export class BosqueEscena extends Phaser.Scene {
     this.debugHelper.update();
     this.hero.move(this.cursors);
 
-<<<<<<< HEAD
     this.currentOverlappingTriggers.forEach((trigger) => {
       if (
         !Phaser.Geom.Intersects.RectangleToRectangle(
@@ -190,7 +200,7 @@ export class BosqueEscena extends Phaser.Scene {
       }
     }
 
-     if (Phaser.Input.Keyboard.JustDown(this.teclaL)) {
+    if (Phaser.Input.Keyboard.JustDown(this.teclaL)) {
       this.perderVida();
     }
   }
@@ -199,10 +209,8 @@ export class BosqueEscena extends Phaser.Scene {
     if (!this.currentOverlappingTriggers.has(trigger)) {
       this.currentOverlappingTriggers.add(trigger);
       this.triggerDialogue(trigger);
-=======
-   
+    }
   }
-}
 
   perderVida() {
     if (this.lives > 0) {
@@ -232,12 +240,11 @@ export class BosqueEscena extends Phaser.Scene {
           this.game.destroy(true);
         }
       });
->>>>>>> origin/control_vidas
     }
   }
 
   triggerDialogue(trigger) {
-     const key = trigger.dialogueKey || 'DefaultKey';
+    const key = trigger.dialogueKey || 'DefaultKey';
 
     if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
     if ((trigger as any).used) return;
