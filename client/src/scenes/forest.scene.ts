@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Hero } from '../sprites/hero';
 import { DebugHelper } from '../utils/debuger.herlper';
+import { LifeHeader } from './life.scene';
 
 export class BosqueEscena extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -12,35 +13,14 @@ export class BosqueEscena extends Phaser.Scene {
   currentOverlappingTriggers: Set<any>;
   private soundCaminar!: Phaser.Sound.BaseSound;
   private musicaFondo!: Phaser.Sound.BaseSound;
+  private header!: LifeHeader;
+  private teclaL!: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super({ key: 'BosqueEscena' });
   }
 
-  preload() {
-    this.load.spritesheet('map', 'assets/tilemaps/map.png', {
-      frameWidth: 16,
-      frameHeight: 15,
-    });
-
-    this.load.tilemapTiledJSON('forest', 'assets/tilemaps/map01.json');
-
-    this.load.aseprite({
-      key: 'hero',
-      textureURL: 'assets/sprites/hero-frames.png',
-      atlasURL: 'assets/sprites/hero-frames.json',
-    });
-    this.load.audio('caminar', [
-      'assets/audio/ogg/leavesWalk01.ogg',
-      'assets/audio/mp3/leavesWalk01.mp3',
-    ]);
-
-    this.load.audio('musicaFondo', [
-      'assets/audio/ogg/intro.ogg',
-      'assets/audio/mp3/intro.mp3',
-    ]);
-    this.load.image('vida_fondo', 'assets/ui/vida.png');
-  }
+  preload() {}
 
   create() {
     this.musicaFondo = this.sound.add('musicaFondo', {
@@ -48,6 +28,7 @@ export class BosqueEscena extends Phaser.Scene {
       volume: 1,
     });
     this.musicaFondo.play();
+    this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
     const map = this.make.tilemap({ key: 'forest' });
     const tileset = map.addTilesetImage('map', 'map');
@@ -78,9 +59,11 @@ export class BosqueEscena extends Phaser.Scene {
       }
     });
 
-    this.scene.launch('LifeScene', {
+    /* this.scene.launch('LifeScene', {
+      lives: 5,
       hero: this.hero,
-    });
+    }); */
+    this.header = new LifeHeader(this, 5); // 5 vidas iniciales
 
     this.anims.createFromAseprite('hero', [
       'respirar',
@@ -206,6 +189,10 @@ export class BosqueEscena extends Phaser.Scene {
         this.soundCaminar.stop();
       }
     }
+
+    if (Phaser.Input.Keyboard.JustDown(this.teclaL)) {
+      this.someDamageFunction();
+    }
   }
 
   handleTriggerOverlap(trigger) {
@@ -278,5 +265,10 @@ export class BosqueEscena extends Phaser.Scene {
       container.style.display =
         container.style.display === 'none' ? 'block' : 'none';
     });
+  }
+
+  someDamageFunction() {
+    const newLives = 3;
+    this.header.updateLives(newLives);
   }
 }

@@ -1,35 +1,28 @@
 import Phaser from 'phaser';
 import { height, width } from '../constants/sizes';
-import { SceneManager } from '../utils/scene.manager';
+import { LifeHeader } from './life.scene';
 
 export class CutTrashScene extends Phaser.Scene {
   dialogueBox: Phaser.GameObjects.Graphics;
+  private header!: LifeHeader;
 
   constructor() {
     super({ key: 'CutTrashScene' });
   }
 
-  preload() {
-    this.load.image('background', 'assets/sprites/background-lianas.jpeg');
-    this.load.image('quitButton', 'assets/sprites/quitbutton.png');
-  }
+  preload() {}
 
   create() {
-    //this.cameras.main.setBackgroundColor(0x000000);
     this.add
       .sprite(0, 0, 'background')
       .setOrigin(0) // Establece el origen en la esquina superior izquierda
       .setDisplaySize(width, height); // Ajusta al tamaño exacto
 
-    const quit = this.add
-      .image(0, 0, 'quitButton')
-      .setOrigin(0, 0)
-      .setScrollFactor(0, 0);
+    this.header = new LifeHeader(this, 3, 'DialogueScene'); // 3 vidas iniciales
+  }
 
-    quit.setInteractive();
-    quit.on('pointerdown', () => {
-      const manager = SceneManager.getInstance(this);
-      manager.transitionTo('LianasScene', 'DialogueScene', 'fade', 500);
-    });
+  someDamageFunction() {
+    const newLives = 3;
+    this.header.updateLives(newLives);
   }
 }
