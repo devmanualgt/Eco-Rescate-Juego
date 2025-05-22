@@ -63,7 +63,7 @@ export class BosqueEscena extends Phaser.Scene {
       lives: 5,
       hero: this.hero,
     }); */
-    this.header = new LifeHeader(this, 5); // 5 vidas iniciales
+    this.header = new LifeHeader(this, 5, 'StartScene'); // 5 vidas iniciales
 
     this.anims.createFromAseprite('hero', [
       'respirar',
@@ -137,6 +137,7 @@ export class BosqueEscena extends Phaser.Scene {
     console.log('Sonido caminar cargado:', this.soundCaminar);
 
     this.createSoundUI();
+    this.dialogueInit();
   }
 
   update() {
@@ -211,6 +212,16 @@ export class BosqueEscena extends Phaser.Scene {
     (trigger as any).used = true;
     this.scene.launch('DialogueScene', {
       trigger: key,
+    });
+  }
+
+  dialogueInit() {
+    //const key = trigger.dialogueKey || 'DefaultKey';
+
+    if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
+
+    this.scene.launch('DialogueScene', {
+      trigger: 'home',
     });
   }
 
