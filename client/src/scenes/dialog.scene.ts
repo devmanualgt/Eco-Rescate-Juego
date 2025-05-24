@@ -17,6 +17,8 @@ export class DialogueScene extends Phaser.Scene {
   currentTextEvent: Phaser.Time.TimerEvent | null;
   fullMessageShown: boolean;
 
+  hero: any;
+
   constructor() {
     super({ key: 'DialogueScene' });
 
@@ -34,11 +36,18 @@ export class DialogueScene extends Phaser.Scene {
 
     this.dialogueData = this.trigger || {};
     this.currentNode = this.trigger.start || 'start';
+    this.hero = data.hero;
   }
 
   create() {
     this.createDialogueBox();
     this.showDialogueNode(this.currentNode);
+
+    this.events.on('reactivarHero', () => {
+      if (this.hero) {
+        this.hero.inputEnabled = true;
+      }
+    });
   }
 
   createDialogueBox() {
@@ -115,7 +124,15 @@ export class DialogueScene extends Phaser.Scene {
         .on('pointerdown', () => {
           if (option.scena) {
             const manager = SceneManager.getInstance(this);
-            manager.transitionTo('BosqueEscena', option.next, 'fade', 500);
+            manager.transitionTo(
+              'BosqueEscena',
+              option.next,
+              'fade',
+              500,
+              () => {
+                this.hero.inputEnabled = false;
+              }
+            );
           } else {
             if (option.next === '') {
               console.log('close');

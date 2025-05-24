@@ -20,10 +20,12 @@ export class SceneManager {
     currentScene: string,
     nextScene: string,
     effect: 'fade' | 'slide' | 'zoom' | 'wipe' = 'fade',
-    duration: number = 1000
+    duration: number = 1000,
+    beforeTransition?: () => void
   ) {
     const camera = this.scene.cameras.main;
     let fx;
+    if (beforeTransition) beforeTransition(); // ✅ Acción previa, como pausar movimiento
 
     // Aplicar efecto visual previo si se requiere
     switch (effect) {
@@ -61,6 +63,9 @@ export class SceneManager {
 
       // Fade in visual
       next.cameras.main.fadeIn(500, 0, 0, 0);
+      //if () {
+      next.events.emit('reactivarHero');
+      //}
     });
   }
 }

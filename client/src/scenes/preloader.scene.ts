@@ -110,13 +110,4 @@ export class Preloader extends Phaser.Scene {
   }
 
   create() {}
-
-  loader() {
-    this.load.on('complete', () => {
-      this.time.delayedCall(1000, () => {
-        this.scene.start('CutTrashScene');
-        //this.scene.start('BosqueEscena');
-      });
-    });
-  }
 }

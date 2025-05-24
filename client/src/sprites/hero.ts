@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 
 export class Hero extends Phaser.Physics.Arcade.Sprite {
   lastDirection: string;
+  inputEnabled = true;
+
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'hero');
 
@@ -9,14 +11,14 @@ export class Hero extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     this.setScale(3);
-    //this.play('respirar');
-    //this.anims.get('respirar').repeat = -1;
     this.play('respirar', true);
 
     this.setCollideWorldBounds(true);
   }
 
   move(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+    if (!this.inputEnabled) return;
+
     this.setVelocity(0);
 
     if (cursors.right.isDown) {
