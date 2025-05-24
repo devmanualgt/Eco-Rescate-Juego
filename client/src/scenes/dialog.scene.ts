@@ -16,8 +16,8 @@ export class DialogueScene extends Phaser.Scene {
   textSpeed: number;
   currentTextEvent: Phaser.Time.TimerEvent | null;
   fullMessageShown: boolean;
-
   hero: any;
+  private textIntervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     super({ key: 'DialogueScene' });
@@ -93,6 +93,8 @@ export class DialogueScene extends Phaser.Scene {
 
     this.dialogueText.setText('');
     this.fullMessageShown = false;
+    this.sound.stopByKey('typing');
+
     this.typeTextEffect(node.text);
 
     // Limitar a 2 opciones como máximo
@@ -136,7 +138,7 @@ export class DialogueScene extends Phaser.Scene {
           } else {
             if (option.next === '') {
               console.log('close');
-
+              this.sound.stopByKey('typing');
               this.scene.stop(); // Cierra el diálogo
             } else {
               this.showDialogueNode(option.next);
@@ -153,18 +155,26 @@ export class DialogueScene extends Phaser.Scene {
   }
 
   typeTextEffect(message: string) {
+    // 🛑 Detener cualquier sonido anterior
+    this.sound.stopByKey('typing');
+
     let charIndex = 0;
     this.dialogueText.setText('');
+    this.fullMessageShown = false;
 
-    this.currentTextEvent = this.time.addEvent({
-      delay: this.textSpeed,
-      repeat: message.length - 1,
-      callback: () => {
-        this.dialogueText.text += message[charIndex++];
-        if (charIndex >= message.length) {
-          this.fullMessageShown = true;
-        }
-      },
-    });
+    // ✅ Reproducir sonido de typing (modo seguro)
+    this.sound.play('typing', { loop: true, volume: 0.5 });
+
+    const intervalId = setInterval(() => {
+      this.dialogueText.text += message[charIndex++];
+
+      if (charIndex >= message.length) {
+        clearInterval(intervalId);
+        this.fullMessageShown = true;
+
+        // 🛑 Detener el sonido de typing por clave
+        this.sound.stopByKey('typing');
+      }
+    }, this.textSpeed);
   }
 }

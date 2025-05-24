@@ -44,6 +44,85 @@ export const dialogues = () => ({
       },
     },
   },
+
+  organico: {
+    start: 'Intro',
+    nodes: {
+      Intro: {
+        personaje: 'Hero',
+        text: 'Aquí solo van restos de comida y cosas naturales. ¡Nada de plástico!',
+        options: [{ text: 'Entendido', next: 'Org2' }],
+      },
+      Org2: {
+        personaje: 'Hero',
+        text: '¿Tienes cáscaras de frutas o verduras? ¡Este es su lugar!',
+        options: [{ text: 'Ok', next: 'Org3' }],
+      },
+      Org3: {
+        personaje: 'Hero',
+        text: 'Todo lo que pueda volverse abono va aquí.',
+        options: [{ text: 'Gracias', next: 'Org4' }],
+      },
+      Org4: {
+        personaje: 'Hero',
+        text: 'No pongas empaques ni basura plástica aquí, por favor.',
+        options: [{ text: 'Lo recordaré', next: '' }],
+      },
+    },
+  },
+
+  reciclable: {
+    start: 'Intro',
+    nodes: {
+      Intro: {
+        personaje: 'Hero',
+        text: 'Este bote es para papel limpio, botellas, latas y frascos.',
+        options: [{ text: 'Entendido', next: 'Rec2' }],
+      },
+      Rec2: {
+        personaje: 'Hero',
+        text: 'Recuerda: ¡todo debe estar limpio y seco!',
+        options: [{ text: 'Claro', next: 'Rec3' }],
+      },
+      Rec3: {
+        personaje: 'Hero',
+        text: 'Si es vidrio, metal, cartón o plástico, y no está sucio, va aquí.',
+        options: [{ text: 'Bien', next: 'Rec4' }],
+      },
+      Rec4: {
+        personaje: 'Hero',
+        text: 'Evita mezclar basura sucia. Eso daña todo el esfuerzo.',
+        options: [{ text: '¡Lo haré bien!', next: '' }],
+      },
+    },
+  },
+
+  noReciclable: {
+    start: 'Intro',
+    nodes: {
+      Intro: {
+        personaje: 'Hero',
+        text: 'Aquí va lo que no se puede reciclar: pañales, servilletas sucias, envoltorios grasientos.',
+        options: [{ text: 'Entendido', next: 'NoRec2' }],
+      },
+      NoRec2: {
+        personaje: 'Hero',
+        text: 'Si está muy sucio o es basura contaminada, va aquí.',
+        options: [{ text: 'Claro', next: 'NoRec3' }],
+      },
+      NoRec3: {
+        personaje: 'Hero',
+        text: 'Este bote ayuda a que no se arruinen los materiales reciclables.',
+        options: [{ text: 'Bien pensado', next: 'NoRec4' }],
+      },
+      NoRec4: {
+        personaje: 'Hero',
+        text: 'Si dudas y está sucio, mejor tíralo aquí.',
+        options: [{ text: 'Lo recordaré', next: '' }],
+      },
+    },
+  },
+
   posion: {
     start: 'Inicio',
     nodes: {

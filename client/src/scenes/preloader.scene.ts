@@ -83,6 +83,8 @@ export class Preloader extends Phaser.Scene {
       'assets/audio/mp3/intro.mp3',
     ]);
 
+    this.load.audio('typing', ['assets/audio/mp3/typing.mp3']);
+
     // images
     this.load.image('vida_fondo', 'assets/ui/vida.png');
     this.load.image('logo', 'assets/ui/logo.png');
