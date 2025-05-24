@@ -82,6 +82,7 @@ export class BosqueEscena extends Phaser.Scene {
     });
 
     this.anims.get('respirar').repeat = -1;
+    this.hero.inputEnabled = true;
 
     // 🎥 Configurar cámara
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -212,6 +213,7 @@ export class BosqueEscena extends Phaser.Scene {
     (trigger as any).used = true;
     this.scene.launch('DialogueScene', {
       trigger: key,
+      hero: this.hero,
     });
   }
 
