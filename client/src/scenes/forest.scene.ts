@@ -125,13 +125,14 @@ export class BosqueEscena extends Phaser.Scene {
     const dialogueLayer = map.getObjectLayer('boxesd');
     if (dialogueLayer) {
       this.dialogueTriggers = this.add.group();
+      const scale = 2.5;
 
       dialogueLayer.objects.forEach((obj) => {
         const trigger = this.add.rectangle(
-          obj.x * 2.5 + (obj.width * 2.5) / 2,
-          obj.y * 2.5 - (obj.height * 2.5) / 2,
-          obj.width * 2.5,
-          obj.height * 2.5,
+          obj.x * scale + (obj.width * scale) / 2, // x + mitad del ancho escalado
+          obj.y * scale + (obj.height * scale) / 2, // y + mitad del alto escalado
+          obj.width * scale, // ancho escalado
+          obj.height * scale,
           0x000000,
           0 // invisible
         ) as Phaser.GameObjects.Rectangle & { dialogueKey: string };
@@ -139,7 +140,7 @@ export class BosqueEscena extends Phaser.Scene {
         this.physics.add.existing(trigger, true); // cuerpo estático
 
         const body = trigger.body as Phaser.Physics.Arcade.StaticBody;
-        body.setSize(obj.width * 2.5, obj.height * 2.5);
+        // body.setSize(obj.width * 2.5, obj.height * 2.5);
         body.setOffset(0, 0);
 
         trigger.dialogueKey = obj.name;
@@ -160,20 +161,6 @@ export class BosqueEscena extends Phaser.Scene {
           this.handleTriggerOverlap(trigger);
         }
       );
-
-      /*  this.physics.add.overlap(
-        this.hero,
-        this.dialogueTriggers,
-        (hero, trigger) => {
-          console.log(
-            'Overlap detectado con trigger:',
-            (trigger as any).dialogueKey
-          );
-          this.handleTriggerOverlap(trigger);
-        },
-        null,
-        this
-      ); */
     }
 
     this.debugHelper = new DebugHelper(this, this.layers);
