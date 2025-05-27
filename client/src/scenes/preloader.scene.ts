@@ -64,6 +64,30 @@ export class Preloader extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 15,
     });
+    this.load.spritesheet(
+      'noreciclaje',
+      'assets/tilemaps/bote_NOreciclaje_32x32.png',
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+    this.load.spritesheet(
+      'organico',
+      'assets/tilemaps/bote_organico_32x32.png',
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+    this.load.spritesheet(
+      'reciclaje',
+      'assets/tilemaps/bote_reciclaje_32x32.png',
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
 
     this.load.tilemapTiledJSON('forest', 'assets/tilemaps/map01.json');
 

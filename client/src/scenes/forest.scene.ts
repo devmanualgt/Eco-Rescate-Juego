@@ -31,7 +31,18 @@ export class BosqueEscena extends Phaser.Scene {
     this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
     const map = this.make.tilemap({ key: 'forest' });
+    console.log('Mapa cargado:', map);
+
     const tileset = map.addTilesetImage('map', 'map');
+    const tileset2 = map.addTilesetImage(
+      'bote_NOreciclaje_32x32.png',
+      'noreciclaje'
+    );
+    const tileset3 = map.addTilesetImage('bote_organico_32x32.png', 'organico');
+    const tileset4 = map.addTilesetImage(
+      'bote_reciclaje_32x32.png',
+      'reciclaje'
+    );
 
     const layersConfig = [
       { name: 'water', collision: [173, 174] },
@@ -39,14 +50,22 @@ export class BosqueEscena extends Phaser.Scene {
       { name: 'tree0', collision: [35, 37, 63, 64, 65] },
       { name: 'tree1', collision: { start: 8, end: 63 } },
       { name: 'tree2', collision: [36] },
-      { name: 'boxes', collision: { start: 231, end: 260 } },
+      { name: 'boxes', collision: [841, 842, 843, 231, 258, 260] },
     ];
+    const allTilesets = [tileset, tileset2, tileset3, tileset4];
 
     layersConfig.forEach((config) => {
-      const layer = map.createLayer(config.name, tileset, 0, 0)?.setScale(2.5);
+      let layer;
+      if (config.name === 'boxes') {
+        layer = map.createLayer(config.name, allTilesets, 0, 0)?.setScale(2.5);
+      } else {
+        layer = map.createLayer(config.name, tileset, 0, 0)?.setScale(2.5);
+      }
       if (layer) {
         this.layers[config.name] = layer;
         if (config.collision) {
+          console.log(layer);
+
           if (Array.isArray(config.collision)) {
             layer.setCollision(config.collision);
           } else {
@@ -114,10 +133,7 @@ export class BosqueEscena extends Phaser.Scene {
           .setAlpha(0) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody & {
           dialogueKey: string;
         };
-        console.log(obj.name);
-
         trigger.dialogueKey = obj.name;
-
         this.dialogueTriggers.add(trigger);
       });
       this.currentOverlappingTriggers = new Set();
