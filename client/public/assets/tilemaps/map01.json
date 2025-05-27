@@ -1,4 +1,12 @@
 { "compressionlevel":-1,
+ "editorsettings":
+    {
+     "export":
+        {
+         "format":"json",
+         "target":"map01.json"
+        }
+    },
  "height":20,
  "infinite":false,
  "layers":[
@@ -209,8 +217,8 @@
                  "type":"",
                  "visible":true,
                  "width":15.5,
-                 "x":482.716141871194,
-                 "y":184.382323817196
+                 "x":478.716141871194,
+                 "y":193.836869271741
                 }, 
                 {
                  "height":0,
@@ -220,41 +228,41 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":341.652669385563,
-                 "y":107.069796157298
+                 "x":343.834487567382,
+                 "y":101.797068884571
                 }, 
                 {
-                 "height":20.5503606732568,
+                 "height":24,
                  "id":9,
                  "name":"noreciclaje",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":18.2669872651171,
-                 "x":264.970750473919,
-                 "y":99.8397280818491
+                 "width":16,
+                 "x":263.907799327085,
+                 "y":118.539079483179
                 }, 
                 {
-                 "height":20.5504,
+                 "height":24,
                  "id":10,
                  "name":"organico",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":18.267,
-                 "x":152.64929181912,
-                 "y":156.411058794194
+                 "width":16,
+                 "x":152.103837273665,
+                 "y":167.501967885103
                 }, 
                 {
-                 "height":20.5504,
+                 "height":24,
                  "id":11,
                  "name":"reciclaje",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":18.267,
-                 "x":375.412887176252,
-                 "y":201.507683604951
+                 "width":16,
+                 "x":375.958341721706,
+                 "y":213.507683604951
                 }],
          "opacity":1,
          "type":"objectgroup",
