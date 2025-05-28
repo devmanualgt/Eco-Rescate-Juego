@@ -31,7 +31,18 @@ export class BosqueEscena extends Phaser.Scene {
     this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
     const map = this.make.tilemap({ key: 'forest' });
+    console.log('Mapa cargado:', map);
+
     const tileset = map.addTilesetImage('map', 'map');
+    const tileset2 = map.addTilesetImage(
+      'bote_NOreciclaje_32x32.png',
+      'noreciclaje'
+    );
+    const tileset3 = map.addTilesetImage('bote_organico_32x32.png', 'organico');
+    const tileset4 = map.addTilesetImage(
+      'bote_reciclaje_32x32.png',
+      'reciclaje'
+    );
 
     const layersConfig = [
       { name: 'water', collision: [173, 174] },
@@ -39,14 +50,23 @@ export class BosqueEscena extends Phaser.Scene {
       { name: 'tree0', collision: [35, 37, 63, 64, 65] },
       { name: 'tree1', collision: { start: 8, end: 63 } },
       { name: 'tree2', collision: [36] },
-      { name: 'boxes', collision: { start: 231, end: 260 } },
+      { name: 'boxes', collision: [9, 10, /* 842, 843, */ 231, 258, 260] },
     ];
+    const allTilesets = [tileset, tileset2, tileset3, tileset4];
 
     layersConfig.forEach((config) => {
-      const layer = map.createLayer(config.name, tileset, 0, 0)?.setScale(2.5);
+      let layer;
+      if (config.name === 'boxes') {
+        layer = map.createLayer(config.name, allTilesets, 0, 0)?.setScale(2.5);
+        //if()
+      } else {
+        layer = map.createLayer(config.name, tileset, 0, 0)?.setScale(2.5);
+      }
       if (layer) {
         this.layers[config.name] = layer;
         if (config.collision) {
+          console.log(layer);
+
           if (Array.isArray(config.collision)) {
             layer.setCollision(config.collision);
           } else {
@@ -105,30 +125,42 @@ export class BosqueEscena extends Phaser.Scene {
 
     const dialogueLayer = map.getObjectLayer('boxesd');
     if (dialogueLayer) {
-      this.dialogueTriggers = this.physics.add.group();
+      this.dialogueTriggers = this.add.group();
+      const scale = 2.5;
 
       dialogueLayer.objects.forEach((obj) => {
-        const trigger = this.physics.add
-          .sprite(obj.x * 2.5, obj.y * 2.5, null)
-          .setOrigin(0, 1)
-          .setSize(obj.width * 2.5, obj.height * 2.5)
-          .setAlpha(0) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody & {
-          dialogueKey: string;
-        };
-        console.log(obj.name);
+        const trigger = this.add.rectangle(
+          obj.x * scale + (obj.width * scale) / 2, // x + mitad del ancho escalado
+          obj.y * scale + (obj.height * scale) / 2, // y + mitad del alto escalado
+          obj.width * scale, // ancho escalado
+          obj.height * scale,
+          0x000000,
+          0 // invisible
+        ) as Phaser.GameObjects.Rectangle & { dialogueKey: string };
+
+        this.physics.add.existing(trigger, true); // cuerpo estático
+
+        const body = trigger.body as Phaser.Physics.Arcade.StaticBody;
+        // body.setSize(obj.width * 2.5, obj.height * 2.5);
+        body.setOffset(0, 0);
 
         trigger.dialogueKey = obj.name;
 
         this.dialogueTriggers.add(trigger);
       });
+
       this.currentOverlappingTriggers = new Set();
 
-      this.physics.add.overlap(
+      this.physics.add.collider(
         this.hero,
         this.dialogueTriggers,
-        (hero, trigger) => this.handleTriggerOverlap(trigger),
-        null,
-        this
+        (hero, trigger) => {
+          console.log(
+            'Colisión detectada con trigger:',
+            (trigger as any).dialogueKey
+          );
+          this.handleTriggerOverlap(trigger);
+        }
       );
     }
 
@@ -198,6 +230,8 @@ export class BosqueEscena extends Phaser.Scene {
   }
 
   handleTriggerOverlap(trigger) {
+    // console.log(trigger);
+
     if (!this.currentOverlappingTriggers.has(trigger)) {
       this.currentOverlappingTriggers.add(trigger);
       this.triggerDialogue(trigger);
@@ -206,6 +240,7 @@ export class BosqueEscena extends Phaser.Scene {
 
   triggerDialogue(trigger) {
     const key = trigger.dialogueKey || 'DefaultKey';
+    console.log(key);
 
     if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
     if ((trigger as any).used) return;

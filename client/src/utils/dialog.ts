@@ -132,6 +132,34 @@ export const dialogues = () => ({
       },
     },
   },
+  noreciclaje: {
+    start: 'Inicio',
+    nodes: {
+      Inicio: {
+        text: '¡Cuidado! Este bote no es para reciclar.',
+        options: [{ text: 'Regresar', next: '' }],
+      },
+    },
+  },
+  reciclaje: {
+    start: 'Inicio',
+    nodes: {
+      Inicio: {
+        text: '¡Bien hecho! Este es el bote correcto para reciclar.',
+        options: [{ text: 'Regresar', next: '' }],
+      },
+    },
+  },
+
+  organico: {
+    start: 'Inicio',
+    nodes: {
+      Inicio: {
+        text: '¡Genial! Este es el bote para residuos orgánicos.',
+        options: [{ text: 'Regresar', next: '' }],
+      },
+    },
+  },
 });
 
 export const getIntroDialogue = () => ({

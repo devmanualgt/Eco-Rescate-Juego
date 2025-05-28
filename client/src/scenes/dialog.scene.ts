@@ -32,7 +32,7 @@ export class DialogueScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.trigger = dialogues()[data.trigger];
+    this.trigger = dialogues()[data.trigger] || dialogues().home;
 
     this.dialogueData = this.trigger || {};
     this.currentNode = this.trigger.start || 'start';
