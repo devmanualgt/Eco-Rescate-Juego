@@ -92,6 +92,9 @@ export class Preloader extends Phaser.Scene {
     this.load.image('quitButton', 'assets/sprites/quitbutton.png');
 
     this.load.image('bote', 'assets/ui/bote.jpg');
+    this.load.image('botenoreciclaje', 'assets/ui/botenoreciclaje.png');
+    this.load.image('boteorganico', 'assets/ui/boteorganico.png');
+    this.load.image('botereciclaje', 'assets/ui/botereciclaje.png');
     this.load.image('basura', 'assets/ui/basura.jpg');
     this.load.image('escena', 'assets/ui/escena.jpg');
 
