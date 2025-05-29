@@ -19,6 +19,7 @@ const itemConfig: Record<
 export class CutTrashScene extends Phaser.Scene {
   dialogueBox: Phaser.GameObjects.Graphics;
   private header!: LifeHeader;
+  private scoreText!: Phaser.GameObjects.Text;
 
   player;
   cursor;
@@ -41,6 +42,20 @@ export class CutTrashScene extends Phaser.Scene {
     //this.add.image(80, 0, 'escena').setOrigin(0, 0);
 
     this.header = new LifeHeader(this, 3, 'DialogueScene'); // 3 vidas iniciales
+
+    // Leer puntaje desde localStorage
+    window.localStorage.removeItem('highscore'); // elimina el valor guardado
+    this.points = 0; // empieza desde cero
+
+    this.scoreText = this.add.text(20, 60, `Puntaje: ${this.points}`, {
+      fontSize: '24px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      stroke: '#000',
+      strokeThickness: 3,
+    });
+    this.scoreText.setScrollFactor(0);
+    this.scoreText.setDepth(100);
 
     this.player = this.physics.add
       .image(85, height - 700, 'bote')
@@ -132,12 +147,19 @@ export class CutTrashScene extends Phaser.Scene {
     basura.setVelocityY(speedDown);
     if (config.type === 'score') {
       this.points += config.value;
+      window.localStorage.setItem('highscore', this.points.toString());
+      this.updateScoreText();
+      console.log('¡Puntos! ' + this.points);
     } else {
       //this.someDamageFunction();
     }
 
-    window.localStorage.setItem('highscore', this.points.toString());
-    console.log('¡Puntos! ' + this.points);
+    // window.localStorage.setItem('highscore', this.points.toString());
+    // console.log('¡Puntos! ' + this.points);
+  }
+
+  updateScoreText() {
+    this.scoreText.setText(`Puntaje: ${this.points}`);
   }
 
   someDamageFunction() {
