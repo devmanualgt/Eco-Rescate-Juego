@@ -54,7 +54,7 @@ export class Preloader extends Phaser.Scene {
     this.load.on('complete', () => {
       console.log('Carga completa');
       const manager = SceneManager.getInstance(this);
-      manager.transitionTo('Preloader', 'CutTrashScene', 'fade', 500);
+      manager.transitionTo('Preloader', 'StartScene', 'fade', 500);
       //            manager.transitionTo('Preloader', 'CutTrashScene', 'fade', 500);
     });
   }
