@@ -54,7 +54,7 @@ export class Preloader extends Phaser.Scene {
     this.load.on('complete', () => {
       console.log('Carga completa');
       const manager = SceneManager.getInstance(this);
-      manager.transitionTo('Preloader', 'StartScene', 'fade', 500);
+      manager.transitionTo('Preloader', 'CutTrashScene', 'fade', 500);
       //            manager.transitionTo('Preloader', 'CutTrashScene', 'fade', 500);
     });
   }
@@ -101,11 +101,15 @@ export class Preloader extends Phaser.Scene {
     // perder vida
     this.load.image('cereza', 'assets/ui/cereza.png');
     this.load.image('limon', 'assets/ui/limon.png');
+    this.load.image('hoja', 'assets/ui/leaft.png');
 
     // dan puntos
     this.load.image('lata', 'assets/ui/lata.png');
     this.load.image('manzana', 'assets/ui/manzana.png');
     this.load.image('papel', 'assets/ui/papel.png');
+    this.load.image('cheetos', 'assets/ui/cheetos.png');
+    this.load.image('pepsi', 'assets/ui/pepsi.png');
+    this.load.image('tortix', 'assets/ui/tortix.png');
 
     this.load.atlas('flares', 'assets/ui/flares.png', 'assets/ui/flares.json');
 
