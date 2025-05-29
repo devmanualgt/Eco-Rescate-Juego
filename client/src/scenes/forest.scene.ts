@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
 import { Hero } from '../sprites/hero';
-import { DebugHelper } from '../utils/debuger.herlper';
+import { DialogueBox } from './dialog.scene';
 import { LifeHeader } from './life.scene';
 
 export class BosqueEscena extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   hero!: Hero;
-  debugHelper: DebugHelper;
+  // debugHelper: DebugHelper;
   map!: Phaser.Tilemaps.Tilemap;
   layers: Phaser.Tilemaps.TilemapLayer[] = [];
   dialogueTriggers: any;
@@ -15,6 +15,7 @@ export class BosqueEscena extends Phaser.Scene {
   private musicaFondo!: Phaser.Sound.BaseSound;
   private header!: LifeHeader;
   private teclaL!: Phaser.Input.Keyboard.Key;
+  dialog: DialogueBox | null = null;
 
   constructor() {
     super({ key: 'BosqueEscena' });
@@ -83,7 +84,7 @@ export class BosqueEscena extends Phaser.Scene {
       lives: 5,
       hero: this.hero,
     }); */
-    this.header = new LifeHeader(this, 5, 'StartScene'); // 5 vidas iniciales
+    this.header = new LifeHeader(this, 5); // 5 vidas iniciales
 
     this.anims.createFromAseprite('hero', [
       'respirar',
@@ -97,6 +98,7 @@ export class BosqueEscena extends Phaser.Scene {
     ]);
 
     this.hero = new Hero(this, 512, 384);
+    //this.hero.setVisible(false)
     Object.values(this.layers).forEach((layer) => {
       if (layer) this.physics.add.collider(this.hero, layer);
     });
@@ -121,7 +123,7 @@ export class BosqueEscena extends Phaser.Scene {
       map.heightInPixels * 2.45
     );
 
-    this.debugHelper = new DebugHelper(this, Object.values(this.layers));
+    //this.debugHelper = new DebugHelper(this, Object.values(this.layers));
 
     const dialogueLayer = map.getObjectLayer('boxesd');
     if (dialogueLayer) {
@@ -164,7 +166,7 @@ export class BosqueEscena extends Phaser.Scene {
       );
     }
 
-    this.debugHelper = new DebugHelper(this, this.layers);
+    //this.debugHelper = new DebugHelper(this, this.layers);
 
     this.soundCaminar = this.sound.add('caminar', { volume: 10 });
     console.log('Sonido caminar cargado:', this.soundCaminar);
@@ -174,7 +176,7 @@ export class BosqueEscena extends Phaser.Scene {
   }
 
   update() {
-    this.debugHelper.update();
+    //this.debugHelper.update();
     this.hero.move(this.cursors);
 
     const triggersToRemove: any[] = [];
@@ -198,11 +200,9 @@ export class BosqueEscena extends Phaser.Scene {
 
       // Si ya no hay ningún trigger activo, detén el diálogo
       if (this.currentOverlappingTriggers.size === 0) {
-        if (this.scene.isActive('DialogueScene')) {
-          this.scene.stop('DialogueScene');
-          console.log(
-            '🛑 DialogueScene detenido por salida de todos los triggers'
-          );
+        if (this.dialog) {
+          this.dialog.destroy();
+          this.dialog = null;
         }
       }
     });
@@ -242,44 +242,63 @@ export class BosqueEscena extends Phaser.Scene {
     const key = trigger.dialogueKey || 'DefaultKey';
     console.log(key);
 
-    if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
+    /*  if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
     if ((trigger as any).used) return;
 
     (trigger as any).used = true;
     this.scene.launch('DialogueScene', {
       trigger: key,
       hero: this.hero,
-    });
+      originScene: 'BosqueEscena',
+    }); */
+    if (this.dialog) {
+      this.dialog.destroy();
+      this.dialog = null;
+    }
+    this.dialog = new DialogueBox(this, key);
   }
 
   dialogueInit() {
     //const key = trigger.dialogueKey || 'DefaultKey';
-
-    if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
+    /*  if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
 
     this.scene.launch('DialogueScene', {
-      trigger: 'home',
+      trigger: 'box',
+      originScene: 'BosqueEscena',
     });
+    this.scene.wake('DialogueScene'); */
+    //this.dialog = new DialogueBox(this, 'box');
+    this.dialog = new DialogueBox(this, 'box', async () => {
+      console.log('hre');
+
+      this.musicaFondo.stop();
+    });
+
+    //this.scene.stop('DialogueScene');
   }
 
   private createSoundUI() {
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.top = '20px';
-    container.style.left = '20px';
-    container.style.background = 'rgba(0, 0, 0, 0.6)';
-    container.style.padding = '12px';
-    container.style.borderRadius = '10px';
-    container.style.color = 'white';
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.fontSize = '14px';
-    container.style.zIndex = '1000';
+    let container = document.getElementById('audio-control-container');
 
-    const volMusica = (this.musicaFondo as Phaser.Sound.WebAudioSound).volume;
-    const volAmbiente = (this.soundCaminar as Phaser.Sound.WebAudioSound)
-      .volume;
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'audio-control-container'; // ✅ ID único para identificarlo
+      container.style.position = 'absolute';
+      container.style.top = '20px';
+      container.style.left = '20px';
+      container.style.background = 'rgba(0, 0, 0, 0.6)';
+      container.style.padding = '12px';
+      container.style.borderRadius = '10px';
+      container.style.color = 'white';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.style.fontSize = '14px';
+      container.style.zIndex = '1000';
 
-    container.innerHTML = `
+      const volMusica = (this.musicaFondo as Phaser.Sound.WebAudioSound).volume;
+      const volAmbiente = (this.soundCaminar as Phaser.Sound.WebAudioSound)
+        .volume;
+
+      container.innerHTML = `
       <label style="display:block; margin-bottom: 10px;">🎵 Música de Fondo:
         <input type="range" id="musicSlider" min="0" max="1" step="0.01" value="${volMusica}">
       </label>
@@ -288,30 +307,34 @@ export class BosqueEscena extends Phaser.Scene {
       </label>
     `;
 
-    document.body.appendChild(container);
+      document.body.appendChild(container);
 
-    const musicSlider = container.querySelector(
-      '#musicSlider'
-    ) as HTMLInputElement;
-    const ambientSlider = container.querySelector(
-      '#ambientSlider'
-    ) as HTMLInputElement;
+      const musicSlider = container.querySelector(
+        '#musicSlider'
+      ) as HTMLInputElement;
+      const ambientSlider = container.querySelector(
+        '#ambientSlider'
+      ) as HTMLInputElement;
 
-    musicSlider.addEventListener('input', () => {
-      (this.musicaFondo as Phaser.Sound.WebAudioSound).setVolume(
-        parseFloat(musicSlider.value)
-      );
-    });
+      musicSlider.addEventListener('input', () => {
+        (this.musicaFondo as Phaser.Sound.WebAudioSound).setVolume(
+          parseFloat(musicSlider.value)
+        );
+      });
 
-    ambientSlider.addEventListener('input', () => {
-      (this.soundCaminar as Phaser.Sound.WebAudioSound).setVolume(
-        parseFloat(ambientSlider.value)
-      );
-    });
+      ambientSlider.addEventListener('input', () => {
+        (this.soundCaminar as Phaser.Sound.WebAudioSound).setVolume(
+          parseFloat(ambientSlider.value)
+        );
+      });
+    }
 
+    // Siempre agrega el atajo de teclado, pero asegura que solo oculta/muestra
     this.input.keyboard.on('keydown-M', () => {
-      container.style.display =
-        container.style.display === 'none' ? 'block' : 'none';
+      if (container) {
+        container.style.display =
+          container.style.display === 'none' ? 'block' : 'none';
+      }
     });
   }
 

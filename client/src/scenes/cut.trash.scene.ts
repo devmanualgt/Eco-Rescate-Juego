@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import Swal from 'sweetalert2';
 import { height, width } from '../constants/sizes';
+import { DialogueBox } from './dialog.scene';
 import { LifeHeader } from './life.scene';
 
 /* const speedDown = 250;
@@ -35,7 +36,7 @@ export class CutTrashScene extends Phaser.Scene {
 
   targets = [];
   points = +window.localStorage.getItem('highscore') || 0;
-
+  stop = false;
   private header!: LifeHeader;
   private scoreText!: Phaser.GameObjects.Text;
   private speedDown = 100; // Velocidad inicial
@@ -44,6 +45,7 @@ export class CutTrashScene extends Phaser.Scene {
   private collectedCount = 0;
   private pauseInProgress = false;
   private currentSkinIndex = 0;
+  dialogB: DialogueBox | null = null;
 
   constructor() {
     super({ key: 'CutTrashScene' });
@@ -51,43 +53,54 @@ export class CutTrashScene extends Phaser.Scene {
 
   preload() {}
 
-  create() {
+  async create() {
     this.add
       .sprite(0, 0, 'background')
       .setOrigin(0) // Establece el origen en la esquina superior izquierda
       .setDisplaySize(width, height); // Ajusta al tamaño exacto
 
-    this.header = new LifeHeader(this, 3, 'DialogueScene'); // 3 vidas iniciales
+    this.header = new LifeHeader(this, 3, 'BosqueEscena'); // 3 vidas iniciales
+    this.player = this.physics.add
+      .image(width - 600, height - 250, 'botereciclaje')
+      .setOrigin(0, 0)
+      .setScale(0.3)
+      .setVisible(false);
+    this.dialogB = new DialogueBox(this, 'home', async () => {
+      // Leer puntaje desde localStorage
+      window.localStorage.removeItem('highscore'); // elimina el valor guardado
+      this.points = 0; // empieza desde cero
 
-    // Leer puntaje desde localStorage
-    window.localStorage.removeItem('highscore'); // elimina el valor guardado
-    this.points = 0; // empieza desde cero
+      this.scoreText = this.add.text(20, 60, `Puntaje: ${this.points}`, {
+        fontSize: '24px',
+        color: '#ffffff',
+        fontFamily: 'Arial',
+        stroke: '#000',
+        strokeThickness: 3,
+      });
+      this.scoreText.setScrollFactor(0);
+      this.scoreText.setDepth(100);
 
-    this.scoreText = this.add.text(20, 60, `Puntaje: ${this.points}`, {
-      fontSize: '24px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
-      stroke: '#000',
-      strokeThickness: 3,
-    });
-    this.scoreText.setScrollFactor(0);
-    this.scoreText.setDepth(100);
+      this.scene.launch('DialogueScene', {
+        trigger: 'organico',
+      });
 
-    this.cursor = this.input.keyboard.createCursorKeys();
-    this.dialog(
-      'Clasifica',
-      'Debes de recolectar la basura que se puede reciclar',
-      'info'
-    ).then(() => {
-      this.elementsGame();
+      this.cursor = this.input.keyboard.createCursorKeys();
+      await this.dropText(
+        `Ahora debes de recolectar la basura \n ${this.getNewType(
+          this.currentSkinIndex
+        )}!`
+      ).then(() => {
+        this.elementsGame();
+      });
     });
   }
 
   elementsGame() {
-    this.player = this.physics.add
-      .image(85, height - 100, 'botereciclaje')
+    /*   this.player = this.physics.add
+      .image(width - 600, height - 250, 'botereciclaje')
       .setOrigin(0, 0)
-      .setScale(0.3);
+      .setScale(0.3); */
+    this.player.setVisible(true);
     this.player.setImmovable(true);
     this.player.body.setAllowGravity(false);
     this.player.setCollideWorldBounds(true);
@@ -100,6 +113,16 @@ export class CutTrashScene extends Phaser.Scene {
     this.pauseInProgress = false;
 
     this.crearItemsFalling(); // 👈 Inicializa la primera tanda de ítems
+
+    this.time.addEvent({
+      delay: 10000, // cada 1 segundo
+      loop: true,
+      callback: () => {
+        if (!this.stop) {
+          this.crearItemsFalling();
+        }
+      },
+    });
   }
 
   crearItemsFalling() {
@@ -115,10 +138,13 @@ export class CutTrashScene extends Phaser.Scene {
     Phaser.Utils.Array.Shuffle(possibleSlots);
     this.targets = [];
 
-    for (let i = 0; i < itemsFalling.length; i++) {
-      if (possibleSlots.length === 0) break;
+    const usedX = this.targets.map((t) => Math.round(t.x));
+    const availableSlots = possibleSlots.filter((x) => !usedX.includes(x));
 
-      const x = possibleSlots.pop();
+    for (let i = 0; i < itemsFalling.length; i++) {
+      if (availableSlots.length === 0) break;
+
+      const x = availableSlots.pop();
       const y = Phaser.Math.Between(-height, 0);
       const randomKey = Phaser.Utils.Array.GetRandom(itemsFalling);
       const config = itemConfig[randomKey];
@@ -150,36 +176,43 @@ export class CutTrashScene extends Phaser.Scene {
   }
 
   update() {
-    const { left, right, up, down } = this.cursor;
+    if (!this.player || !this.cursor) return;
+
+    this.targets = this.targets.filter((item) => {
+      if (item.y > this.cameras.main.height) {
+        item.destroy();
+        return false;
+      }
+      return true;
+    });
 
     // Movimiento horizontal
-    if (this.player) {
-      if (left.isDown) {
-        this.player.setVelocityX(-this.playerSpeed);
-      } else if (right.isDown) {
-        this.player.setVelocityX(this.playerSpeed);
-      } else {
-        this.player.setVelocityX(0);
-      }
-
-      // Movimiento vertical
-      if (up.isDown) {
-        this.player.setVelocityY(-this.playerSpeed);
-      } else if (down.isDown) {
-        this.player.setVelocityY(this.playerSpeed);
-      } else {
-        this.player.setVelocityY(0);
-      }
-
-      // Lógica para reposicionar los objetos basura
-      this.targets.forEach((basura) => {
-        if (basura.y >= height) {
-          basura.setY(0);
-          basura.setX(this.getRandomX());
-          basura.setVelocityY(this.speedDown);
-        }
-      });
+    const { left, right, up, down } = this.cursor;
+    if (left.isDown) {
+      this.player.setVelocityX(-this.playerSpeed);
+    } else if (right.isDown) {
+      this.player.setVelocityX(this.playerSpeed);
+    } else {
+      this.player.setVelocityX(0);
     }
+
+    // Movimiento vertical
+    if (up.isDown) {
+      this.player.setVelocityY(-this.playerSpeed);
+    } else if (down.isDown) {
+      this.player.setVelocityY(this.playerSpeed);
+    } else {
+      this.player.setVelocityY(0);
+    }
+
+    // Lógica para reposicionar los objetos basura
+    this.targets.forEach((basura) => {
+      if (basura.y >= height) {
+        basura.setY(0);
+        basura.setX(this.getRandomX());
+        basura.setVelocityY(this.speedDown);
+      }
+    });
   }
 
   getRandomX() {
@@ -189,19 +222,29 @@ export class CutTrashScene extends Phaser.Scene {
   async targetHit(basura, config) {
     const currentBote = this.player.texture.key;
     const sinBote = currentBote.replace('bote', '');
-
     this.collectedCount++;
 
     // ✅ Cuando recolecta 10
-    if (this.collectedCount >= 3) {
+    if (this.collectedCount >= 10) {
       this.pauseInProgress = true;
 
       // ❌ Eliminar todos los ítems actuales
       this.targets.forEach((obj) => obj.destroy());
       this.targets = [];
+      this.changeBote();
+      await this.dropText(
+        `Ahora debes de recolectar la basura \n ${this.getNewType(
+          this.currentSkinIndex
+        )}!`
+      ).then(() => {
+        //this.changeBote();
+        this.speedDown += this.speedIncrement;
+        console.log('⬇️ Nueva velocidad:', this.speedDown);
 
-      await this.dropText('Ahora debes de !').then(() => {
-        this.changeBote();
+        // Aplicar nueva velocidad a todos los objetos en pantalla
+        this.targets.forEach((item) => {
+          item.setVelocityY(this.speedDown);
+        });
       });
 
       this.collectedCount = 0;
@@ -214,18 +257,63 @@ export class CutTrashScene extends Phaser.Scene {
     basura.destroy();
 
     if (config.type === 'score') {
+      let deltaText = null;
       if (sinBote === config.tag) {
         this.points += config.value;
-        window.localStorage.setItem('highscore', this.points.toString());
-        this.updateScoreText();
-        console.log('¡Puntos! ' + this.points);
+        deltaText = `+${config.value}`;
+      } else {
+        if (this.points === 0) return;
+        this.points -= config.value;
+        deltaText = `-${config.value}`;
       }
+
+      window.localStorage.setItem('highscore', this.points.toString());
+      this.updateScoreText();
+
+      // Mostrar texto flotante sobre el jugador
+      const feedback = this.add
+        .text(
+          this.player.x + this.player.width / 2,
+          this.player.y - 20,
+          deltaText,
+          {
+            fontSize: '24px',
+            fontStyle: 'bold',
+            color: sinBote === config.tag ? '#00ff00' : '#ff0000',
+            stroke: '#000000',
+            strokeThickness: 2,
+          }
+        )
+        .setOrigin(0.5)
+        .setDepth(200);
+
+      this.tweens.add({
+        targets: feedback,
+        y: feedback.y - 30,
+        alpha: 0,
+        duration: 1000,
+        ease: 'Power1',
+        onComplete: () => feedback.destroy(),
+      });
     } else {
-      //this.someDamageFunction();
+      this.someDamageFunction();
     }
 
     // window.localStorage.setItem('highscore', this.points.toString());
     // console.log('¡Puntos! ' + this.points);
+  }
+
+  getNewType(type) {
+    switch (type) {
+      case 1:
+        return 'ORGANICA';
+      case 2:
+        return 'NO RECICLABLE';
+      case 0:
+        return 'RECICLABLE';
+      default:
+        return 'TODO TIPO DE BASURA';
+    }
   }
 
   updateScoreText() {
@@ -234,7 +322,25 @@ export class CutTrashScene extends Phaser.Scene {
 
   someDamageFunction() {
     const newLives = 3;
-    this.header.updateLives(newLives);
+    const shotModal = this.header.updateLives(newLives);
+    if (shotModal) {
+      this.pauseItems();
+    }
+  }
+
+  pauseItems() {
+    this.stop = true;
+    this.targets.forEach((item) => {
+      item.body.setVelocity(0, 0);
+    });
+  }
+
+  // ✅ Reanudar caída
+  resumeItems() {
+    this.stop = false;
+    this.targets.forEach((item) => {
+      item.setVelocityY(this.speedDown);
+    });
   }
 
   changeBote() {
@@ -243,39 +349,47 @@ export class CutTrashScene extends Phaser.Scene {
     const newSkin = boteSkins[this.currentSkinIndex];
 
     this.player.setTexture(newSkin);
-    /* this.time.addEvent({
-      delay: 10000, // 10 segundos
-      loop: true,
-      callback: () => {
-        currentSkinIndex = (currentSkinIndex + 1) % boteSkins.length;
-        const newSkin = boteSkins[currentSkinIndex];
-
-      
-        this.player.setTexture(newSkin);
-      },
-    }); */
   }
 
   dropText(message: string): Promise<void> {
     return new Promise((resolve) => {
-      const text = this.add
-        .text(this.cameras.main.centerX, -50, message, {
+      const tempText = this.add
+        .text(0, 0, message, {
           fontSize: '32px',
           color: '#ffffff',
           fontStyle: 'bold',
-          backgroundColor: '#000000',
           padding: { x: 10, y: 5 },
+          align: 'center',
+          wordWrap: { width: this.cameras.main.width * 0.8 },
         })
         .setOrigin(0.5);
 
+      // Medidas basadas en el texto
+      const { width, height } = tempText;
+      const bg = this.add.graphics();
+      bg.fillStyle(0x000000, 0.8); // Negro con 80% de opacidad
+      bg.fillRoundedRect(
+        this.cameras.main.centerX - width / 2 - 10,
+        -50 - height / 2 - 5,
+        width + 20,
+        height + 10,
+        10
+      );
+
+      // Reubica el texto en el centro
+      tempText.setPosition(this.cameras.main.centerX, -50);
+
+      // Agrupa para animar juntos
+      const container = this.add.container(0, 0, [bg, tempText]);
+
       this.tweens.add({
-        targets: text,
-        y: this.cameras.main.centerY,
+        targets: container,
+        y: this.cameras.main.centerY + 50,
         duration: 1000,
         ease: 'Power2',
         onComplete: () => {
           this.time.delayedCall(1500, () => {
-            text.destroy();
+            container.destroy();
             resolve();
           });
         },
@@ -300,5 +414,29 @@ export class CutTrashScene extends Phaser.Scene {
         clearInterval(timerInterval);
       },
     });
+  }
+
+  shutdown() {
+    console.log('🔴 La escena ha sido detenida.');
+  }
+  destroy() {
+    console.log('💀 La escena ha sido destruida.');
+  }
+
+  pause() {
+    console.log('⏸ Escena pausada');
+  }
+
+  resume() {
+    console.log('▶️ Escena reanudada');
+  }
+
+  sleep() {
+    console.log('💤 DialogueScene dormida');
+  }
+
+  wake() {
+    console.log('👀 DialogueScene reactivada');
+    // Puedes reiniciar datos si hace falta
   }
 }

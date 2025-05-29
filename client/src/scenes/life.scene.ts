@@ -1,7 +1,6 @@
 // ui/LifeHeader.ts
 import Phaser from 'phaser';
 import Swal from 'sweetalert2';
-import { SceneManager } from '../utils/scene.manager';
 
 export class LifeHeader {
   scene: Phaser.Scene;
@@ -41,6 +40,8 @@ export class LifeHeader {
   }
 
   private bntBack(backScene: string) {
+    console.log(backScene);
+
     const back = this.scene.add
       .image(0, 0, 'quitButton')
       .setOrigin(0, 0)
@@ -48,8 +49,29 @@ export class LifeHeader {
 
     back.setInteractive();
     back.on('pointerdown', () => {
-      const manager = SceneManager.getInstance(this.scene);
-      manager.transitionTo('LianasScene', backScene, 'fade', 500);
+      /*   const manager = SceneManager.getInstance(this.scene);
+      manager.transitionTo('CutTrashScene', backScene, 'fade', 500); */
+      const pixelated =
+        this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
+
+      if (pixelated) {
+        this.scene.add.tween({
+          targets: pixelated,
+          duration: 700,
+          amount: 40,
+          onComplete: () => {
+            this.scene.cameras.main.fadeOut(100);
+
+            this.scene.time.delayedCall(150, () => {
+              this.scene.scene.start(backScene); // <- usa el valor en option.scena
+            });
+          },
+        });
+      } else {
+        // En caso de que no exista postFX pixelate
+        this.scene.scene.start(backScene);
+      }
+      // this.scene.scene.restart();
     });
   }
 
@@ -64,15 +86,16 @@ export class LifeHeader {
       this.hearts[this.maxLives].setTint(0x000000);
       this.cameras.main.shake(100, 0.02);
     }
-
+    let click;
     if (this.maxLives <= 0) {
       Swal.fire({
-        title: '¡Game Over!',
-        text: '¿Quieres reiniciar el juego?',
+        title: 'Te has equivocado varias veces',
+        text: 'Debes de recolectar segun el tipo color del bote \n ¿Quieres reiniciar el juego?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Reiniciar',
         cancelButtonText: 'Salir',
+        backdrop: false,
       }).then((result) => {
         if (result.isConfirmed) {
           this.maxLives = 3;
@@ -81,11 +104,35 @@ export class LifeHeader {
             h.setVisible(true);
             h.clearTint();
           });
+          click = 'ok';
         } else {
+          click = 'close';
+          const pixelated =
+            this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
+
+          if (pixelated) {
+            this.scene.add.tween({
+              targets: pixelated,
+              duration: 700,
+              amount: 40,
+              onComplete: () => {
+                this.scene.cameras.main.fadeOut(100);
+
+                this.scene.time.delayedCall(150, () => {
+                  this.scene.scene.start(this.backScene); // <- usa el valor en option.scena
+                });
+              },
+            });
+          } else {
+            // En caso de que no exista postFX pixelate
+            this.scene.scene.start(this.backScene);
+          }
           //this.game.destroy(true);
         }
       });
+      return true;
     }
+    return click;
   }
 
   hide() {

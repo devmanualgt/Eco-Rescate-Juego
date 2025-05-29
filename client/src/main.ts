@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { height, width } from './constants/sizes';
 import { CutTrashScene } from './scenes/cut.trash.scene';
-import { DialogueScene } from './scenes/dialog.scene';
+//import { DialogueScene } from './scenes/dialog.scene';
 import { BosqueEscena } from './scenes/forest.scene';
 
 import { Preloader } from './scenes/preloader.scene';
@@ -17,7 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 0, x: 0 },
     },
   },
@@ -27,7 +27,7 @@ const config: Phaser.Types.Core.GameConfig = {
     Preloader,
     StartScene,
     BosqueEscena,
-    DialogueScene,
+    //DialogueScene,
     CutTrashScene,
   ],
 };
