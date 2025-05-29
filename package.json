@@ -21,7 +21,8 @@
   "dependencies": {
     "sweetalert2": "^11.21.2",
     "turbo": "^2.4.4",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
