@@ -116,17 +116,24 @@ export class Preloader extends Phaser.Scene {
     this.load.image('quitButton', 'assets/sprites/quitbutton.png');
 
     this.load.image('bote', 'assets/ui/bote.jpg');
+    this.load.image('botenoreciclaje', 'assets/ui/botenoreciclaje.png');
+    this.load.image('boteorganico', 'assets/ui/boteorganico.png');
+    this.load.image('botereciclaje', 'assets/ui/botereciclaje.png');
     this.load.image('basura', 'assets/ui/basura.jpg');
     this.load.image('escena', 'assets/ui/escena.jpg');
 
     // perder vida
     this.load.image('cereza', 'assets/ui/cereza.png');
     this.load.image('limon', 'assets/ui/limon.png');
+    this.load.image('hoja', 'assets/ui/leaft.png');
 
     // dan puntos
     this.load.image('lata', 'assets/ui/lata.png');
     this.load.image('manzana', 'assets/ui/manzana.png');
     this.load.image('papel', 'assets/ui/papel.png');
+    this.load.image('cheetos', 'assets/ui/cheetos.png');
+    this.load.image('pepsi', 'assets/ui/pepsi.png');
+    this.load.image('tortix', 'assets/ui/tortix.png');
 
     this.load.atlas('flares', 'assets/ui/flares.png', 'assets/ui/flares.json');
 
