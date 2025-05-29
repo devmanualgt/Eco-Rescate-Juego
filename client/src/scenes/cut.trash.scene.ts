@@ -88,25 +88,37 @@ export class CutTrashScene extends Phaser.Scene {
     }
   }
 
-  update() {
-    const { left, right } = this.cursor;
+ update() {
+  const { left, right, up, down } = this.cursor;
 
-    if (left.isDown) {
-      this.player.setVelocityX(-this.playerSpeed);
-    } else if (right.isDown) {
-      this.player.setVelocityX(this.playerSpeed);
-    } else {
-      this.player.setVelocityX(0);
-    }
-
-    this.targets.forEach((basura) => {
-      if (basura.y >= height) {
-        basura.setY(0);
-        basura.setX(this.getRandomX());
-        basura.setVelocityY(speedDown);
-      }
-    });
+  // Movimiento horizontal
+  if (left.isDown) {
+    this.player.setVelocityX(-this.playerSpeed);
+  } else if (right.isDown) {
+    this.player.setVelocityX(this.playerSpeed);
+  } else {
+    this.player.setVelocityX(0);
   }
+
+  // Movimiento vertical
+  if (up.isDown) {
+    this.player.setVelocityY(-this.playerSpeed);
+  } else if (down.isDown) {
+    this.player.setVelocityY(this.playerSpeed);
+  } else {
+    this.player.setVelocityY(0);
+  }
+
+  // Lógica para reposicionar los objetos basura
+  this.targets.forEach((basura) => {
+    if (basura.y >= height) {
+      basura.setY(0);
+      basura.setX(this.getRandomX());
+      basura.setVelocityY(speedDown);
+    }
+  });
+}
+
 
   getRandomX() {
     return Math.floor(Math.random() * (width - 100));
