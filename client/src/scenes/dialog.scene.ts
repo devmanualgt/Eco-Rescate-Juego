@@ -9,19 +9,24 @@ export class DialogueBox {
   private dialogueText: Phaser.GameObjects.Text;
   private optionButtons: Phaser.GameObjects.Group;
   private characterIndicator: Phaser.GameObjects.Arc;
-  private textSpeed: number = 25;
+  private textSpeed: number = 50;
   private fullMessageShown = false;
   private textIntervalId: ReturnType<typeof setInterval> | null = null;
-  private onComplete?: () => void;
+
+  private dialogueImage?: Phaser.GameObjects.Image;
+
+  onComplete?: (stop: boolean) => void;
+  position;
 
   constructor(
     scene: Phaser.Scene,
     dialogueKey: string,
-    onComplete?: () => void
+    onComplete?: (stop: boolean) => void, // ✅ Ahora espera un parámetro booleano
+    position: 'center' | 'bottom' = 'bottom' // nueva propiedad
   ) {
     this.scene = scene;
     this.onComplete = onComplete;
-
+    this.position = position;
     const dialoguesData = dialogues();
     this.dialogueData = dialoguesData[dialogueKey] || dialoguesData.home;
     this.currentNode = this.dialogueData.start || 'start';
@@ -33,33 +38,46 @@ export class DialogueBox {
   private createDialogueBox() {
     const { width, height } = this.scene.cameras.main;
 
-    this.dialogueBox = this.scene.add.graphics();
-    this.dialogueBox.setScrollFactor(0); // <- Aquí
+    const boxHeight = 250;
+    const yOffset =
+      this.position === 'center'
+        ? height / 2 - boxHeight / 2
+        : height - boxHeight - 20;
 
+    this.dialogueBox = this.scene.add.graphics();
+    this.dialogueBox.setScrollFactor(0);
     this.dialogueBox.fillStyle(0x000000, 0.8);
-    this.dialogueBox.fillRoundedRect(50, height - 170, width - 100, 150, 10);
+    this.dialogueBox.fillRoundedRect(50, yOffset, width - 100, boxHeight, 10);
 
     this.characterIndicator = this.scene.add.circle(
-      70,
-      height - 140,
-      10,
+      90,
+      yOffset + 50,
+      20,
       0xffffff
     );
-    this.characterIndicator.setScrollFactor(0); // <- Aquí
+    this.characterIndicator.setScrollFactor(0);
 
-    this.characterNameText = this.scene.add.text(100, height - 150, '', {
+    this.characterNameText = this.scene.add.text(width / 2, yOffset + 20, '', {
       fontSize: '20px',
       color: '#fff',
-      wordWrap: { width: width - 140 },
+      wordWrap: { width: width * 0.8 },
+      lineSpacing: 20,
+      padding: { x: 30, y: 20 },
+      align: 'center',
     });
-    this.characterNameText.setScrollFactor(0); // <- Aquí
+    this.characterNameText.setOrigin(0.5, 0); // Centrado horizontal, top alineado
+    this.characterNameText.setScrollFactor(0);
 
-    this.dialogueText = this.scene.add.text(120, height - 120, '', {
+    this.dialogueText = this.scene.add.text(width / 2, yOffset + 70, '', {
       fontSize: '18px',
       color: '#ffffff',
-      wordWrap: { width: width - 140 },
+      wordWrap: { width: width * 0.8 },
+      padding: { x: 30, y: 20 },
+      lineSpacing: 10,
+      align: 'center',
     });
-    this.dialogueText.setScrollFactor(0); // <- Aquí
+    this.dialogueText.setOrigin(0.5, 0);
+    this.dialogueText.setScrollFactor(0);
 
     this.optionButtons = this.scene.add.group();
   }
@@ -69,14 +87,40 @@ export class DialogueBox {
     if (!node) return;
 
     this.currentNode = nodeKey;
-    this.characterNameText.setText(node.personaje || '');
+    this.characterNameText.setText(node.titulo || '');
     this.optionButtons.clear(true, true);
 
     this.dialogueText.setText('');
     this.fullMessageShown = false;
-
     this.scene.sound.stopByKey('typing');
     this.typeTextEffect(node.text);
+
+    if (this.dialogueImage) {
+      this.dialogueImage.destroy(); // eliminar la anterior si existía
+      this.dialogueImage = undefined;
+    }
+
+    if (node.img) {
+      const { width, height } = this.scene.cameras.main;
+
+      const yOffset =
+        this.position === 'center' ? height / 2 - 250 / 2 : height - 250 - 20;
+
+      this.dialogueImage = this.scene.add
+        .image(width - 150, yOffset + 125, node.img)
+        .setOrigin(0.5, 0)
+        .setScale(0.3)
+        .setScrollFactor(0);
+
+      this.scene.tweens.add({
+        targets: this.dialogueImage,
+        y: '+=10',
+        duration: 1000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
 
     const options = node.options.slice(0, 2);
     const { width, height } = this.scene.cameras.main;
@@ -85,7 +129,13 @@ export class DialogueBox {
     const totalWidth =
       options.length * buttonWidth + (options.length - 1) * spacing;
     const startX = width / 2 - totalWidth / 2;
-    const buttonY = height - 60;
+    // const buttonY = height - 60;
+    const boxHeight = 150;
+
+    const buttonY =
+      this.position === 'center'
+        ? height / 2 + boxHeight / 2
+        : height - boxHeight + 70;
 
     options.forEach((option, index) => {
       const x = startX + index * (buttonWidth + spacing);
@@ -104,6 +154,7 @@ export class DialogueBox {
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
           if (option.scena) {
+            this.destroy(true); // Ocultar el diálogo
             const pixelated =
               this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
 
@@ -116,7 +167,7 @@ export class DialogueBox {
                   this.scene.cameras.main.fadeOut(100);
 
                   this.scene.time.delayedCall(150, () => {
-                    this.scene.scene.start(option.next); // <- usa el valor en option.scena
+                    this.scene.scene.start(option.next); //
                   });
                 },
               });
@@ -124,22 +175,13 @@ export class DialogueBox {
               // En caso de que no exista postFX pixelate
               this.scene.scene.start(option.next);
             }
-            this.destroy(); // Ocultar el diálogo
           } else {
             if (option.next === '') {
-              this.destroy(); // Ocultar el diálogo
-              //this.sound.stopByKey('typing');
-              //this.scene.stop(); // Cierra el diálogo
+              this.destroy(false);
             } else {
               this.showDialogueNode(option.next);
             }
           }
-
-          /* if (option.next === '') {
-            this.destroy(); // Ocultar el diálogo
-          } else {
-            this.showDialogueNode(option.next);
-          } */
         });
       btn.setScrollFactor(0); // <- Aquí
 
@@ -147,7 +189,7 @@ export class DialogueBox {
     });
 
     if (options.length === 0) {
-      this.scene.time.delayedCall(1500, () => this.destroy());
+      this.scene.time.delayedCall(1500, () => this.destroy(false));
     }
   }
 
@@ -166,7 +208,11 @@ export class DialogueBox {
     }, this.textSpeed);
   }
 
-  destroy() {
+  destroy(stop) {
+    if (this.dialogueImage) {
+      this.dialogueImage.destroy();
+      this.dialogueImage = undefined;
+    }
     this.dialogueBox.destroy();
     this.characterIndicator.destroy();
     this.characterNameText.destroy();
@@ -174,9 +220,10 @@ export class DialogueBox {
     this.optionButtons.clear(true, true);
     if (this.textIntervalId) clearInterval(this.textIntervalId);
     this.scene.sound.stopByKey('typing');
+    console.log(stop);
 
     if (this.onComplete) {
-      this.onComplete(); // <- Aquí se llama al callback cuando finaliza
+      this.onComplete(stop); // <- Aquí se llama al callback cuando finaliza
     }
   }
 }

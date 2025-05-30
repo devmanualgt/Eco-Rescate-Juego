@@ -172,7 +172,8 @@ export class BosqueEscena extends Phaser.Scene {
     console.log('Sonido caminar cargado:', this.soundCaminar);
 
     this.createSoundUI();
-    this.dialogueInit();
+    //this.dialogueInit();
+    //this.openDialogue('home', 'center');
   }
 
   update() {
@@ -201,7 +202,7 @@ export class BosqueEscena extends Phaser.Scene {
       // Si ya no hay ningún trigger activo, detén el diálogo
       if (this.currentOverlappingTriggers.size === 0) {
         if (this.dialog) {
-          this.dialog.destroy();
+          this.dialog.destroy(false);
           this.dialog = null;
         }
       }
@@ -231,50 +232,31 @@ export class BosqueEscena extends Phaser.Scene {
 
   handleTriggerOverlap(trigger) {
     // console.log(trigger);
-
+    const key = trigger.dialogueKey || 'DefaultKey';
     if (!this.currentOverlappingTriggers.has(trigger)) {
       this.currentOverlappingTriggers.add(trigger);
-      this.triggerDialogue(trigger);
+      this.openDialogue(key, 'bottom');
     }
   }
 
-  triggerDialogue(trigger) {
-    const key = trigger.dialogueKey || 'DefaultKey';
-    console.log(key);
-
-    /*  if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
-    if ((trigger as any).used) return;
-
-    (trigger as any).used = true;
-    this.scene.launch('DialogueScene', {
-      trigger: key,
-      hero: this.hero,
-      originScene: 'BosqueEscena',
-    }); */
+  openDialogue(key, position: 'center' | 'bottom') {
     if (this.dialog) {
-      this.dialog.destroy();
+      this.dialog.destroy(false);
       this.dialog = null;
     }
-    this.dialog = new DialogueBox(this, key);
-  }
+    console.log(key);
 
-  dialogueInit() {
-    //const key = trigger.dialogueKey || 'DefaultKey';
-    /*  if (this.scene.isActive('DialogueScene')) return; // evita lanzar múltiples veces
-
-    this.scene.launch('DialogueScene', {
-      trigger: 'box',
-      originScene: 'BosqueEscena',
-    });
-    this.scene.wake('DialogueScene'); */
-    //this.dialog = new DialogueBox(this, 'box');
-    this.dialog = new DialogueBox(this, 'box', async () => {
-      console.log('hre');
-
-      this.musicaFondo.stop();
-    });
-
-    //this.scene.stop('DialogueScene');
+    this.dialog = new DialogueBox(
+      this,
+      key,
+      (stop: boolean) => {
+        console.log('¿Se debe detener música?', stop);
+        if (stop) {
+          this.musicaFondo.stop();
+        }
+      },
+      position
+    );
   }
 
   private createSoundUI() {

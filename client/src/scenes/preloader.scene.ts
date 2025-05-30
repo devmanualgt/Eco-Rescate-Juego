@@ -113,7 +113,7 @@ export class Preloader extends Phaser.Scene {
     this.load.image('vida_fondo', 'assets/ui/vida.png');
     this.load.image('logo', 'assets/ui/logo.png');
     this.load.image('background', 'assets/sprites/background-lianas.jpeg');
-    this.load.image('quitButton', 'assets/sprites/quitbutton.png');
+    this.load.image('quitButton', 'assets/ui/salir.png');
 
     this.load.image('bote', 'assets/ui/bote.jpg');
     this.load.image('botenoreciclaje', 'assets/ui/botenoreciclaje.png');
@@ -136,6 +136,8 @@ export class Preloader extends Phaser.Scene {
     this.load.image('tortix', 'assets/ui/tortix.png');
 
     this.load.atlas('flares', 'assets/ui/flares.png', 'assets/ui/flares.json');
+
+    this.load.image('flechas', 'assets/ui/flechas.png');
 
     /*  for (let i = 0; i < 100; i++) {
       this.load.image(`dummy-${i}`, 'assets/ui/logo.png'); // puede ser un ícono pequeño

@@ -65,34 +65,35 @@ export class CutTrashScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScale(0.3)
       .setVisible(false);
-    this.dialogB = new DialogueBox(this, 'home', async () => {
-      // Leer puntaje desde localStorage
-      window.localStorage.removeItem('highscore'); // elimina el valor guardado
-      this.points = 0; // empieza desde cero
+    this.dialogB = new DialogueBox(
+      this,
+      'game1',
+      async () => {
+        // Leer puntaje desde localStorage
+        window.localStorage.removeItem('highscore'); // elimina el valor guardado
+        this.points = 0; // empieza desde cero
 
-      this.scoreText = this.add.text(20, 60, `Puntaje: ${this.points}`, {
-        fontSize: '24px',
-        color: '#ffffff',
-        fontFamily: 'Arial',
-        stroke: '#000',
-        strokeThickness: 3,
-      });
-      this.scoreText.setScrollFactor(0);
-      this.scoreText.setDepth(100);
+        this.scoreText = this.add.text(20, 60, `Puntaje: ${this.points}`, {
+          fontSize: '24px',
+          color: '#ffffff',
+          fontFamily: 'Arial',
+          stroke: '#000',
+          strokeThickness: 3,
+        });
+        this.scoreText.setScrollFactor(0);
+        this.scoreText.setDepth(100);
 
-      this.scene.launch('DialogueScene', {
-        trigger: 'organico',
-      });
-
-      this.cursor = this.input.keyboard.createCursorKeys();
-      await this.dropText(
-        `Ahora debes de recolectar la basura \n ${this.getNewType(
-          this.currentSkinIndex
-        )}!`
-      ).then(() => {
-        this.elementsGame();
-      });
-    });
+        this.cursor = this.input.keyboard.createCursorKeys();
+        await this.dropText(
+          `Ahora debes de recolectar la basura \n ${this.getNewType(
+            this.currentSkinIndex
+          )}!`
+        ).then(() => {
+          this.elementsGame();
+        });
+      },
+      'center'
+    );
   }
 
   elementsGame() {

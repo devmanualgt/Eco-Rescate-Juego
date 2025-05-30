@@ -3,21 +3,27 @@ export const dialogues = () => ({
     start: 'Inicio',
     nodes: {
       Inicio: {
-        titulo: '¡Bienvenido!',
+        titulo: '🌍 ¡Bienvenido a la gran aventura verde! 🌿',
         personaje: 'Hero',
-        text: 'Bienvenido al juego...\n\nCuánta gente tira desechos porque no sabe cómo reciclar los residuos.\n\n¿Aceptas el reto?',
+        text: 'El planeta está en peligro… ¡la Basuraleza, un monstruo hecho de desechos tóxicos, está cubriendo el mundo de basura! 🗑️👹 Los bosques, ríos, playas y ciudades están tristes y sucios',
         options: [
-          { text: 'No, gracias', next: '' },
-          { text: 'Sí, acepto', next: 'Historia' },
+          { text: 'Salir', next: 'StartScene', scena: true },
+          { text: 'Continuar', next: 'Historia' },
         ],
       },
       Historia: {
-        text: 'Sabías que mientras más reciclas, mejor es la vida en el planeta! 🌎',
-        options: [{ text: 'Continuar', next: '' }],
+        titulo: '🌍 ¡Bienvenido a la gran aventura verde! 🌿',
+        text: '¡Joven héroe! Te necesito. Solo tú puedes limpiar el \n mundo y devolverle la vida. \n ¿Estás listo para salvar el mundo, uno a uno, contenedor a contenedor? ',
+        options: [
+          { text: 'Salir', next: 'StartScene', scena: true },
+          { text: 'Si, acepto', next: 'Jugar' },
+        ],
       },
       Jugar: {
-        text: '¡Juguemos!',
-        options: [{ text: 'Regresar', next: '' }],
+        titulo: '🌍 ¡Bienvenido a la gran aventura verde! 🌿',
+        text: 'Usa las flechas del teclado para poder moverte',
+        img: 'flechas',
+        options: [{ text: 'Jugar', next: '' }],
       },
     },
   },
@@ -26,21 +32,29 @@ export const dialogues = () => ({
     start: 'Inicio',
     nodes: {
       Inicio: {
-        titulo: '¡Bienvenido!',
+        titulo: '🌳 El Bosque de las Mil Semillas 🌱',
         personaje: 'Hero',
-        text: '¡Encontraste una caja misteriosa!',
+        text: '¡Has llegado al mágico *Bosque de las Mil Semillas*! 🌱✨ Pero algo anda mal... 😟 ¡Está lleno de basura! 🗑️ Los árboles están tristes y los animalitos piden ayuda 🐿️💧. ¡Solo tú puedes salvarlo!',
         options: [
           { text: 'Salir', next: '' },
-          { text: 'Abrir', next: 'CutTrashScene', scena: true },
+          { text: '¡Vamos a ayudar!', next: 'Abrir' },
         ],
       },
       Abrir: {
-        text: 'Dentro hay un mensaje antiguo...',
-        options: [{ text: 'Regresar', next: 'Inicio' }],
+        titulo: '🌳 El Bosque de las Mil Semillas 🌱',
+        text: '🌟 ¿Estás listo para convertirte en un verdadero héroe verde? 🌿 Usa tus habilidades para limpiar, reciclar y devolverle la vida al bosque. ¡La naturaleza cuenta contigo! 💪💚',
+        options: [
+          { text: 'En otro momento', next: '' },
+          {
+            text: '¡Sí, acepto!',
+            next: 'CutTrashScene',
+            scena: true,
+          },
+        ],
       },
       Jugar: {
-        text: '¡Juguemos algo nuevo!',
-        options: [{ text: 'Regresar', next: 'Inicio' }],
+        text: '🎲 ¡Hora de divertirse! 🌟 Elige tu misión y ayuda al planeta mientras juegas. 🌎💫',
+        options: [{ text: 'Volver al bosque', next: 'Inicio' }],
       },
     },
   },
@@ -49,23 +63,31 @@ export const dialogues = () => ({
     start: 'Intro',
     nodes: {
       Intro: {
+        titulo: '🌿 Bote de color 🟢, !Organizo!',
         personaje: 'Hero',
-        text: 'Aquí solo van restos de comida y cosas naturales. ¡Nada de plástico!',
+        text: 'Aquí solo van restos de comida y cosas naturales.\n¡Nada de plástico!',
+        img: 'manzana',
         options: [{ text: 'Entendido', next: 'Org2' }],
       },
       Org2: {
+        titulo: '🌿 Bote de color 🟢, !Organizo!',
         personaje: 'Hero',
         text: '¿Tienes cáscaras de frutas o verduras? ¡Este es su lugar!',
+        img: 'manzana',
         options: [{ text: 'Ok', next: 'Org3' }],
       },
       Org3: {
+        titulo: '🌿 Bote de color 🟢, !Organizo!',
         personaje: 'Hero',
         text: 'Todo lo que pueda volverse abono va aquí.',
+        img: 'manzana',
         options: [{ text: 'Gracias', next: 'Org4' }],
       },
       Org4: {
+        titulo: '🌿 Bote de color 🟢, !Organizo!',
         personaje: 'Hero',
         text: 'No pongas empaques ni basura plástica aquí, por favor.',
+        img: 'manzana',
         options: [{ text: 'Lo recordaré', next: '' }],
       },
     },
@@ -75,23 +97,31 @@ export const dialogues = () => ({
     start: 'Intro',
     nodes: {
       Intro: {
+        titulo: '♻ Bote de color 🔵, !Reciclar!',
         personaje: 'Hero',
         text: 'Este bote es para papel limpio, botellas, latas y frascos.',
+        img: 'pepsi',
         options: [{ text: 'Entendido', next: 'Rec2' }],
       },
       Rec2: {
+        titulo: '♻ Bote de color 🔵, !Reciclar!',
         personaje: 'Hero',
         text: 'Recuerda: ¡todo debe estar limpio y seco!',
+        img: 'pepsi',
         options: [{ text: 'Claro', next: 'Rec3' }],
       },
       Rec3: {
+        titulo: '♻ Bote de color 🔵, !Reciclar!',
         personaje: 'Hero',
         text: 'Si es vidrio, metal, cartón o plástico, y no está sucio, va aquí.',
+        img: 'papel',
         options: [{ text: 'Bien', next: 'Rec4' }],
       },
       Rec4: {
+        titulo: '♻ Bote de color 🔵, !Reciclar!',
         personaje: 'Hero',
         text: 'Evita mezclar basura sucia. Eso daña todo el esfuerzo.',
+        img: 'papel',
         options: [{ text: '¡Lo haré bien!', next: '' }],
       },
     },
@@ -101,23 +131,31 @@ export const dialogues = () => ({
     start: 'Intro',
     nodes: {
       Intro: {
+        titulo: '🗑️ Bote de color ⚫️, !NO-Reciclar!',
         personaje: 'Hero',
         text: 'Aquí va lo que no se puede reciclar: pañales, servilletas sucias, envoltorios grasientos.',
+        img: 'lata',
         options: [{ text: 'Entendido', next: 'NoRec2' }],
       },
       NoRec2: {
+        titulo: '🗑️ Bote de color ⚫️, !NO-Reciclar!',
         personaje: 'Hero',
         text: 'Si está muy sucio o es basura contaminada, va aquí.',
+        img: 'lata',
         options: [{ text: 'Claro', next: 'NoRec3' }],
       },
       NoRec3: {
+        titulo: '🗑️ Bote de color ⚫️, !NO-Reciclar!',
         personaje: 'Hero',
         text: 'Este bote ayuda a que no se arruinen los materiales reciclables.',
+        img: 'lata',
         options: [{ text: 'Bien pensado', next: 'NoRec4' }],
       },
       NoRec4: {
+        titulo: '🗑️ Bote de color ⚫️, !NO-Reciclar!',
         personaje: 'Hero',
         text: 'Si dudas y está sucio, mejor tíralo aquí.',
+        img: 'lata',
         options: [{ text: 'Lo recordaré', next: '' }],
       },
     },
@@ -133,25 +171,32 @@ export const dialogues = () => ({
     },
   },
 
-  reciclajes: {
+  game1: {
     start: 'Inicio',
     nodes: {
       Inicio: {
-        text: '¡Bien hecho! Este es el bote correcto para reciclar.',
-        options: [{ text: 'Regresar', next: '' }],
+        titulo: '🌳 El Bosque de las Mil Semillas 🌱',
+        personaje: 'Hero',
+        text: 'Tu misión es mover el bote de basura correcto y atrapar los objetos según su tipo',
+        options: [
+          { text: 'Salir', next: 'BosqueEscena', scena: true },
+          { text: '¡Como jugar!', next: 'Abrir' },
+        ],
+      },
+      Abrir: {
+        titulo: '🎮 ¿Cómo jugar?',
+        text: '👆 Usa las flechas del teclado para mover el bote. \n🟩 Bote Verde = 🍎 Orgánico (comida, hojas, cáscaras)\n🔵 Bote Azul = 🔄 Reciclaje (plástico, papel, cartón)\n⚫ Bote Negro = 🚫 No reciclable (pañales, papel sucio)',
+        img: 'flechas',
+        options: [
+          { text: 'Regresar', next: 'Inicio' },
+          {
+            text: 'Jugemos!',
+            next: '',
+          },
+        ],
       },
     },
   },
-
-  /*  organico: {
-    start: 'Inicio',
-    nodes: {
-      Inicio: {
-        text: '¡Genial! Este es el bote para residuos orgánicos.',
-        options: [{ text: 'Regresar', next: '' }],
-      },
-    },
-  }, */
 });
 
 export const getIntroDialogue = () => ({

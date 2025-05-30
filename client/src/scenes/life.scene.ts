@@ -45,7 +45,8 @@ export class LifeHeader {
     const back = this.scene.add
       .image(0, 0, 'quitButton')
       .setOrigin(0, 0)
-      .setScrollFactor(0, 0);
+      .setScrollFactor(0, 0)
+      .setScale(0.2);
 
     back.setInteractive();
     back.on('pointerdown', () => {
