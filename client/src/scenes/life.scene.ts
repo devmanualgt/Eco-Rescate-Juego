@@ -40,8 +40,6 @@ export class LifeHeader {
   }
 
   private bntBack(backScene: string) {
-    console.log(backScene);
-
     const back = this.scene.add
       .image(0, 0, 'quitButton')
       .setOrigin(0, 0)
@@ -50,6 +48,7 @@ export class LifeHeader {
 
     back.setInteractive();
     back.on('pointerdown', () => {
+      window.localStorage.setItem('showHistory', 'false');
       /*   const manager = SceneManager.getInstance(this.scene);
       manager.transitionTo('CutTrashScene', backScene, 'fade', 500); */
       const pixelated =

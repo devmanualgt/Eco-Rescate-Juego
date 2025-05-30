@@ -32,7 +32,6 @@ export class BosqueEscena extends Phaser.Scene {
     this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
     const map = this.make.tilemap({ key: 'forest' });
-    console.log('Mapa cargado:', map);
 
     const tileset = map.addTilesetImage('map', 'map');
     const tileset2 = map.addTilesetImage(
@@ -66,8 +65,6 @@ export class BosqueEscena extends Phaser.Scene {
       if (layer) {
         this.layers[config.name] = layer;
         if (config.collision) {
-          console.log(layer);
-
           if (Array.isArray(config.collision)) {
             layer.setCollision(config.collision);
           } else {
@@ -157,10 +154,6 @@ export class BosqueEscena extends Phaser.Scene {
         this.hero,
         this.dialogueTriggers,
         (hero, trigger) => {
-          console.log(
-            'Colisión detectada con trigger:',
-            (trigger as any).dialogueKey
-          );
           this.handleTriggerOverlap(trigger);
         }
       );
@@ -172,8 +165,12 @@ export class BosqueEscena extends Phaser.Scene {
     console.log('Sonido caminar cargado:', this.soundCaminar);
 
     this.createSoundUI();
-    //this.dialogueInit();
-    //this.openDialogue('home', 'center');
+
+    console.log(window.localStorage.getItem('showHistory'));
+
+    if (window.localStorage.getItem('showHistory') === 'true') {
+      this.openDialogue('home', 'center');
+    }
   }
 
   update() {
@@ -231,7 +228,6 @@ export class BosqueEscena extends Phaser.Scene {
   }
 
   handleTriggerOverlap(trigger) {
-    // console.log(trigger);
     const key = trigger.dialogueKey || 'DefaultKey';
     if (!this.currentOverlappingTriggers.has(trigger)) {
       this.currentOverlappingTriggers.add(trigger);
@@ -241,16 +237,14 @@ export class BosqueEscena extends Phaser.Scene {
 
   openDialogue(key, position: 'center' | 'bottom') {
     if (this.dialog) {
-      this.dialog.destroy(false);
+      //this.dialog.destroy(false);
       this.dialog = null;
     }
-    console.log(key);
 
     this.dialog = new DialogueBox(
       this,
       key,
       (stop: boolean) => {
-        console.log('¿Se debe detener música?', stop);
         if (stop) {
           this.musicaFondo.stop();
         }

@@ -97,10 +97,6 @@ export class CutTrashScene extends Phaser.Scene {
   }
 
   elementsGame() {
-    /*   this.player = this.physics.add
-      .image(width - 600, height - 250, 'botereciclaje')
-      .setOrigin(0, 0)
-      .setScale(0.3); */
     this.player.setVisible(true);
     this.player.setImmovable(true);
     this.player.body.setAllowGravity(false);
@@ -299,9 +295,6 @@ export class CutTrashScene extends Phaser.Scene {
     } else {
       this.someDamageFunction();
     }
-
-    // window.localStorage.setItem('highscore', this.points.toString());
-    // console.log('¡Puntos! ' + this.points);
   }
 
   getNewType(type) {
@@ -415,29 +408,5 @@ export class CutTrashScene extends Phaser.Scene {
         clearInterval(timerInterval);
       },
     });
-  }
-
-  shutdown() {
-    console.log('🔴 La escena ha sido detenida.');
-  }
-  destroy() {
-    console.log('💀 La escena ha sido destruida.');
-  }
-
-  pause() {
-    console.log('⏸ Escena pausada');
-  }
-
-  resume() {
-    console.log('▶️ Escena reanudada');
-  }
-
-  sleep() {
-    console.log('💤 DialogueScene dormida');
-  }
-
-  wake() {
-    console.log('👀 DialogueScene reactivada');
-    // Puedes reiniciar datos si hace falta
   }
 }

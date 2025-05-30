@@ -72,6 +72,8 @@ export class StartScene extends Phaser.Scene {
         const manager = SceneManager.getInstance(this);
         manager.transitionTo('Preloader', 'BosqueEscena', 'fade', 500);
       });
+
+      window.localStorage.setItem('showHistory', 'true');
     });
   }
 }

@@ -9,7 +9,7 @@ export class DialogueBox {
   private dialogueText: Phaser.GameObjects.Text;
   private optionButtons: Phaser.GameObjects.Group;
   private characterIndicator: Phaser.GameObjects.Arc;
-  private textSpeed: number = 50;
+  private textSpeed: number = 90;
   private fullMessageShown = false;
   private textIntervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -155,6 +155,8 @@ export class DialogueBox {
         .on('pointerdown', () => {
           if (option.scena) {
             this.destroy(true); // Ocultar el diálogo
+            /*  const manager = SceneManager.getInstance(this.scene);
+            manager.transitionTo('CutTrashScene', option.next, 'fade', 500); */
             const pixelated =
               this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
 
@@ -189,7 +191,7 @@ export class DialogueBox {
     });
 
     if (options.length === 0) {
-      this.scene.time.delayedCall(1500, () => this.destroy(false));
+      this.scene.time.delayedCall(1500, () => {} /* this.destroy(false) */);
     }
   }
 
@@ -220,8 +222,6 @@ export class DialogueBox {
     this.optionButtons.clear(true, true);
     if (this.textIntervalId) clearInterval(this.textIntervalId);
     this.scene.sound.stopByKey('typing');
-    console.log(stop);
-
     if (this.onComplete) {
       this.onComplete(stop); // <- Aquí se llama al callback cuando finaliza
     }

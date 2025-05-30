@@ -63,28 +63,28 @@ export const dialogues = () => ({
     start: 'Intro',
     nodes: {
       Intro: {
-        titulo: '🌿 Bote de color 🟢, !Organizo!',
+        titulo: '🌿 Bote de color 🟢, !Organico!',
         personaje: 'Hero',
         text: 'Aquí solo van restos de comida y cosas naturales.\n¡Nada de plástico!',
         img: 'manzana',
         options: [{ text: 'Entendido', next: 'Org2' }],
       },
       Org2: {
-        titulo: '🌿 Bote de color 🟢, !Organizo!',
+        titulo: '🌿 Bote de color 🟢, !Organico!',
         personaje: 'Hero',
         text: '¿Tienes cáscaras de frutas o verduras? ¡Este es su lugar!',
         img: 'manzana',
         options: [{ text: 'Ok', next: 'Org3' }],
       },
       Org3: {
-        titulo: '🌿 Bote de color 🟢, !Organizo!',
+        titulo: '🌿 Bote de color 🟢, !Organico!',
         personaje: 'Hero',
         text: 'Todo lo que pueda volverse abono va aquí.',
         img: 'manzana',
         options: [{ text: 'Gracias', next: 'Org4' }],
       },
       Org4: {
-        titulo: '🌿 Bote de color 🟢, !Organizo!',
+        titulo: '🌿 Bote de color 🟢, !Organico!',
         personaje: 'Hero',
         text: 'No pongas empaques ni basura plástica aquí, por favor.',
         img: 'manzana',
