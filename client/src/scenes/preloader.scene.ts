@@ -139,9 +139,9 @@ export class Preloader extends Phaser.Scene {
 
     this.load.image('flechas', 'assets/ui/flechas.png');
 
-    /*  for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       this.load.image(`dummy-${i}`, 'assets/ui/logo.png'); // puede ser un ícono pequeño
-    } */
+    }
   }
 
   create() {}
