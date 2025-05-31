@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { dialogues } from '../utils/dialog';
+
 export class DialogueBox {
   private scene: Phaser.Scene;
   private dialogueData: any;
@@ -21,8 +22,8 @@ export class DialogueBox {
   constructor(
     scene: Phaser.Scene,
     dialogueKey: string,
-    onComplete?: (stop: boolean) => void, // ✅ Ahora espera un parámetro booleano
-    position: 'center' | 'bottom' = 'bottom' // nueva propiedad
+    onComplete?: (stop: boolean) => void,
+    position: 'center' | 'bottom' = 'bottom'
   ) {
     this.scene = scene;
     this.onComplete = onComplete;
@@ -65,7 +66,7 @@ export class DialogueBox {
       padding: { x: 30, y: 20 },
       align: 'center',
     });
-    this.characterNameText.setOrigin(0.5, 0); // Centrado horizontal, top alineado
+    this.characterNameText.setOrigin(0.5, 0);
     this.characterNameText.setScrollFactor(0);
 
     this.dialogueText = this.scene.add.text(width / 2, yOffset + 70, '', {
@@ -83,6 +84,13 @@ export class DialogueBox {
   }
 
   private showDialogueNode(nodeKey: string) {
+    // Limpiar intervalos y sonidos previos para evitar solapamientos
+    if (this.textIntervalId) {
+      clearInterval(this.textIntervalId);
+      this.textIntervalId = null;
+      this.scene.sound.stopByKey('typing');
+    }
+
     const node = this.dialogueData.nodes[nodeKey];
     if (!node) return;
 
@@ -92,11 +100,11 @@ export class DialogueBox {
 
     this.dialogueText.setText('');
     this.fullMessageShown = false;
-    this.scene.sound.stopByKey('typing');
+
     this.typeTextEffect(node.text);
 
     if (this.dialogueImage) {
-      this.dialogueImage.destroy(); // eliminar la anterior si existía
+      this.dialogueImage.destroy();
       this.dialogueImage = undefined;
     }
 
@@ -129,7 +137,6 @@ export class DialogueBox {
     const totalWidth =
       options.length * buttonWidth + (options.length - 1) * spacing;
     const startX = width / 2 - totalWidth / 2;
-    // const buttonY = height - 60;
     const boxHeight = 150;
 
     const buttonY =
@@ -140,8 +147,7 @@ export class DialogueBox {
     options.forEach((option, index) => {
       const x = startX + index * (buttonWidth + spacing);
       const bg = this.scene.add.graphics();
-      bg.setScrollFactor(0); // <- Aquí
-
+      bg.setScrollFactor(0);
       bg.fillStyle(0x444444, 1);
       bg.fillRoundedRect(x, buttonY, buttonWidth, 40, 10);
 
@@ -153,10 +159,21 @@ export class DialogueBox {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
+          // Si el texto aún no terminó de escribirse, mostrarlo completo inmediatamente
+          if (!this.fullMessageShown) {
+            if (this.textIntervalId) {
+              clearInterval(this.textIntervalId);
+              this.textIntervalId = null;
+            }
+            this.dialogueText.setText(node.text);
+            this.fullMessageShown = true;
+            this.scene.sound.stopByKey('typing');
+            return; // No avanzar todavía
+          }
+
+          // Avanzar o cerrar diálogo si texto ya completo
           if (option.scena) {
-            this.destroy(true); // Ocultar el diálogo
-            /*  const manager = SceneManager.getInstance(this.scene);
-            manager.transitionTo('CutTrashScene', option.next, 'fade', 500); */
+            this.destroy(true);
             const pixelated =
               this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
 
@@ -169,12 +186,11 @@ export class DialogueBox {
                   this.scene.cameras.main.fadeOut(100);
 
                   this.scene.time.delayedCall(150, () => {
-                    this.scene.scene.start(option.next); //
+                    this.scene.scene.start(option.next);
                   });
                 },
               });
             } else {
-              // En caso de que no exista postFX pixelate
               this.scene.scene.start(option.next);
             }
           } else {
@@ -185,13 +201,13 @@ export class DialogueBox {
             }
           }
         });
-      btn.setScrollFactor(0); // <- Aquí
+      btn.setScrollFactor(0);
 
       this.optionButtons.addMultiple([bg, btn]);
     });
 
     if (options.length === 0) {
-      this.scene.time.delayedCall(1500, () => {} /* this.destroy(false) */);
+      this.scene.time.delayedCall(1500, () => {});
     }
   }
 
@@ -204,13 +220,14 @@ export class DialogueBox {
       this.dialogueText.text += message[charIndex++];
       if (charIndex >= message.length) {
         clearInterval(this.textIntervalId!);
+        this.textIntervalId = null;
         this.fullMessageShown = true;
         this.scene.sound.stopByKey('typing');
       }
     }, this.textSpeed);
   }
 
-  destroy(stop) {
+  destroy(stop: boolean) {
     if (this.dialogueImage) {
       this.dialogueImage.destroy();
       this.dialogueImage = undefined;
@@ -220,10 +237,13 @@ export class DialogueBox {
     this.characterNameText.destroy();
     this.dialogueText.destroy();
     this.optionButtons.clear(true, true);
-    if (this.textIntervalId) clearInterval(this.textIntervalId);
+    if (this.textIntervalId) {
+      clearInterval(this.textIntervalId);
+      this.textIntervalId = null;
+    }
     this.scene.sound.stopByKey('typing');
     if (this.onComplete) {
-      this.onComplete(stop); // <- Aquí se llama al callback cuando finaliza
+      this.onComplete(stop);
     }
   }
 }
