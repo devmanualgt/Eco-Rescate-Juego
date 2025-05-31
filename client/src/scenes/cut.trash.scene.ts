@@ -17,7 +17,7 @@ const itemConfig: Record<
   }
 > = {
   lata: { scale: 0.5, type: 'score', value: 10, tag: 'noreciclaje' },
-  diaper: { scale: 3.5, type: 'score', value: 15, tag: 'noreciclaje' },
+  diaper: { scale: 0.3, type: 'score', value: 15, tag: 'noreciclaje' },
   manzana: { scale: 0.45, type: 'score', value: 5, tag: 'organico' },
   papel: { scale: 0.6, type: 'score', value: 5, tag: 'reciclaje' },
   cheetos: { scale: 0.3, type: 'score', value: 5, tag: 'reciclaje' },
