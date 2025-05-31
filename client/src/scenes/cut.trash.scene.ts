@@ -14,18 +14,74 @@ const itemConfig: Record<
     type: 'score' | 'damage';
     value: number;
     tag: 'noreciclaje' | 'organico' | 'reciclaje' | 'bien' | 'papel';
+    name: string;
   }
 > = {
-  lata: { scale: 0.5, type: 'score', value: 10, tag: 'noreciclaje' },
-  diaper: { scale: 0.3, type: 'score', value: 15, tag: 'noreciclaje' },
-  manzana: { scale: 0.45, type: 'score', value: 5, tag: 'organico' },
-  papel: { scale: 0.6, type: 'score', value: 5, tag: 'reciclaje' },
-  cheetos: { scale: 0.3, type: 'score', value: 5, tag: 'reciclaje' },
-  pepsi: { scale: 0.3, type: 'score', value: 5, tag: 'reciclaje' },
-  tortix: { scale: 0.3, type: 'score', value: 5, tag: 'reciclaje' },
-  cereza: { scale: 1, type: 'damage', value: 1, tag: 'bien' },
-  limon: { scale: 1, type: 'damage', value: 1, tag: 'bien' },
-  hoja: { scale: 0.1, type: 'damage', value: 1, tag: 'bien' },
+  lata: {
+    scale: 0.5,
+    type: 'score',
+    value: 10,
+    tag: 'noreciclaje',
+    name: 'una Lata',
+  },
+  diaper: {
+    scale: 0.3,
+    type: 'score',
+    value: 15,
+    tag: 'noreciclaje',
+    name: 'un Pañal',
+  },
+  manzana: {
+    scale: 0.45,
+    type: 'score',
+    value: 5,
+    tag: 'organico',
+    name: 'una cascara de manzana',
+  },
+  banana: {
+    scale: 0.45,
+    type: 'score',
+    value: 5,
+    tag: 'organico',
+    name: 'una cascara de banana',
+  },
+  papel: {
+    scale: 0.6,
+    type: 'score',
+    value: 5,
+    tag: 'reciclaje',
+    name: 'un pedazo de Papel',
+  },
+  cheetos: {
+    scale: 0.3,
+    type: 'score',
+    value: 5,
+    tag: 'reciclaje',
+    name: 'una Bolsa de cheetos',
+  },
+  pepsi: {
+    scale: 0.3,
+    type: 'score',
+    value: 5,
+    tag: 'reciclaje',
+    name: 'una Botella',
+  },
+  tortix: {
+    scale: 0.3,
+    type: 'score',
+    value: 5,
+    tag: 'reciclaje',
+    name: 'una Blasa de tortix',
+  },
+  cereza: {
+    scale: 1,
+    type: 'damage',
+    value: 1,
+    tag: 'bien',
+    name: 'una fruta',
+  },
+  limon: { scale: 1, type: 'damage', value: 1, tag: 'bien', name: 'un limon' },
+  hoja: { scale: 0.1, type: 'damage', value: 1, tag: 'bien', name: 'una hoja' },
 };
 
 const boteSkins = ['botereciclaje', 'boteorganico', 'botenoreciclaje']; // Cambia los nombres según los recursos cargados
@@ -263,6 +319,36 @@ export class CutTrashScene extends Phaser.Scene {
         if (this.points === 0) return;
         this.points -= config.value;
         deltaText = `-${config.value}`;
+
+        // ✅ Mostrar mensaje informativo en esquina
+        const warningText = this.add
+          .text(
+            this.scale.width - 20,
+            20,
+            `¡Haz recolectado ${
+              config.name
+            },\nno corresponde para basura de tipo ${this.getNewType(
+              this.currentSkinIndex
+            )}!`,
+            {
+              fontSize: '16px',
+              color: '#ffff00',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              padding: { x: 10, y: 5 },
+              align: 'right',
+            }
+          )
+          .setOrigin(1, 0)
+          .setScrollFactor(0)
+          .setDepth(999);
+
+        this.tweens.add({
+          targets: warningText,
+          alpha: 0,
+          y: 0,
+          duration: 9000,
+          onComplete: () => warningText.destroy(),
+        });
       }
 
       window.localStorage.setItem('highscore', this.points.toString());

@@ -70,7 +70,7 @@ export class StartScene extends Phaser.Scene {
 
       this.input.once('pointerdown', () => {
         const manager = SceneManager.getInstance(this);
-        manager.transitionTo('Preloader', 'BosqueEscena', 'fade', 500);
+        manager.transitionTo('Preloader', 'CutTrashScene', 'fade', 500);
       });
 
       window.localStorage.setItem('showHistory', 'true');

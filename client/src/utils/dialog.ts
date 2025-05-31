@@ -73,7 +73,7 @@ export const dialogues = () => ({
         titulo: '🌿 Bote de color 🟢, !Organico!',
         personaje: 'Hero',
         text: '¿Tienes cáscaras de frutas o verduras? ¡Este es su lugar!',
-        img: 'manzana',
+        img: 'banana',
         options: [{ text: 'Ok', next: 'Org3' }],
       },
       Org3: {
@@ -87,7 +87,7 @@ export const dialogues = () => ({
         titulo: '🌿 Bote de color 🟢, !Organico!',
         personaje: 'Hero',
         text: 'No pongas empaques ni basura plástica aquí, por favor.',
-        img: 'manzana',
+        img: 'banana',
         options: [{ text: 'Lo recordaré', next: '' }],
       },
     },

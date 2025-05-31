@@ -130,6 +130,7 @@ export class Preloader extends Phaser.Scene {
     // dan puntos
     this.load.image('lata', 'assets/ui/lata.png');
     this.load.image('manzana', 'assets/ui/manzana.png');
+    this.load.image('banana', 'assets/ui/banana.png');
     this.load.image('papel', 'assets/ui/papel.png');
     this.load.image('cheetos', 'assets/ui/cheetos.png');
     this.load.image('pepsi', 'assets/ui/pepsi.png');
