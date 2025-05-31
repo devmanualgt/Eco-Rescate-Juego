@@ -48,8 +48,6 @@ export class DebugHelper {
       return;
     }
 
-    console.log('Ejecutando toggleCollisions');
-
     const colors = [
       new Phaser.Display.Color(0, 255, 0, 255),
       new Phaser.Display.Color(255, 255, 0, 255),

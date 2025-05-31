@@ -1,51 +1,67 @@
 import Phaser from 'phaser';
 import { Hero } from '../sprites/hero';
-import { DebugHelper } from '../utils/debuger.herlper';
+import { DialogueBox } from './dialog.scene';
+import { LifeHeader } from './life.scene';
 
 export class BosqueEscena extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   hero!: Hero;
-  debugHelper: DebugHelper;
-  map!: Phaser.Tilemaps.Tilemap; // Agregar esta propiedad
-  layers: Phaser.Tilemaps.TilemapLayer[];
+  // debugHelper: DebugHelper;
+  map!: Phaser.Tilemaps.Tilemap;
+  layers: Phaser.Tilemaps.TilemapLayer[] = [];
   dialogueTriggers: any;
+  currentOverlappingTriggers: Set<any>;
+  private soundCaminar!: Phaser.Sound.BaseSound;
+  private musicaFondo!: Phaser.Sound.BaseSound;
+  private header!: LifeHeader;
+  private teclaL!: Phaser.Input.Keyboard.Key;
+  dialog: DialogueBox | null = null;
+
   constructor() {
-    super('BosqueEscena');
+    super({ key: 'BosqueEscena' });
   }
 
-  preload() {
-    this.load.spritesheet('map', 'assets/tilemaps/map.png', {
-      frameWidth: 16,
-      frameHeight: 15,
-    });
-
-    this.load.tilemapTiledJSON('forest', 'assets/tilemaps/map01.json');
-
-    this.load.aseprite({
-      key: 'hero',
-      textureURL: 'assets/sprites/hero-frames.png',
-      atlasURL: 'assets/sprites/hero-frames.json',
-    });
-  }
+  preload() {}
 
   create() {
-    const map = this.make.tilemap({ key: 'forest' });
-    const tileset = map.addTilesetImage('map', 'map');
+    this.musicaFondo = this.sound.add('musicaFondo', {
+      loop: true,
+      volume: 1,
+    });
+    this.musicaFondo.play();
+    this.teclaL = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
-    // 🔹 Definir las capas y sus colisiones
+    const map = this.make.tilemap({ key: 'forest' });
+
+    const tileset = map.addTilesetImage('map', 'map');
+    const tileset2 = map.addTilesetImage(
+      'bote_NOreciclaje_32x32.png',
+      'noreciclaje'
+    );
+    const tileset3 = map.addTilesetImage('bote_organico_32x32.png', 'organico');
+    const tileset4 = map.addTilesetImage(
+      'bote_reciclaje_32x32.png',
+      'reciclaje'
+    );
+
     const layersConfig = [
       { name: 'water', collision: [173, 174] },
       { name: 'land', collision: null },
       { name: 'tree0', collision: [35, 37, 63, 64, 65] },
       { name: 'tree1', collision: { start: 8, end: 63 } },
       { name: 'tree2', collision: [36] },
-      { name: 'boxes', collision: { start: 231, end: 260 } },
+      { name: 'boxes', collision: [9, 10, /* 842, 843, */ 231, 258, 260] },
     ];
-
-    this.layers = [];
+    const allTilesets = [tileset, tileset2, tileset3, tileset4];
 
     layersConfig.forEach((config) => {
-      const layer = map.createLayer(config.name, tileset, 0, 0)?.setScale(2.5);
+      let layer;
+      if (config.name === 'boxes') {
+        layer = map.createLayer(config.name, allTilesets, 0, 0)?.setScale(2.5);
+        //if()
+      } else {
+        layer = map.createLayer(config.name, tileset, 0, 0)?.setScale(2.5);
+      }
       if (layer) {
         this.layers[config.name] = layer;
         if (config.collision) {
@@ -61,18 +77,12 @@ export class BosqueEscena extends Phaser.Scene {
       }
     });
 
-    // 🦸‍♂️ Crear el héroe después de cargar las capas
-    this.hero = new Hero(this, 512, 384);
+    /* this.scene.launch('LifeScene', {
+      lives: 5,
+      hero: this.hero,
+    }); */
+    this.header = new LifeHeader(this, 5); // 5 vidas iniciales
 
-    // 🔹 Agregar colisiones solo si la capa existe
-    Object.values(this.layers).forEach((layer) => {
-      if (layer.layer.name === 'water') {
-        console.log('layer.name', layer.layer.name);
-      }
-      if (layer) this.physics.add.collider(this.hero, layer);
-    });
-
-    // 🏃‍♂️ Crear animaciones
     this.anims.createFromAseprite('hero', [
       'respirar',
       'respirar-right',
@@ -83,10 +93,19 @@ export class BosqueEscena extends Phaser.Scene {
       'walk-front',
       'walk-back',
     ]);
+
+    this.hero = new Hero(this, 512, 384);
+    //this.hero.setVisible(false)
+    Object.values(this.layers).forEach((layer) => {
+      if (layer) this.physics.add.collider(this.hero, layer);
+    });
+
     this.anims.get('respirar').repeat = -1;
+    this.hero.inputEnabled = true;
 
     // 🎥 Configurar cámara
     this.cursors = this.input.keyboard.createCursorKeys();
+
     this.cameras.main.setBounds(
       0,
       0,
@@ -101,97 +120,202 @@ export class BosqueEscena extends Phaser.Scene {
       map.heightInPixels * 2.45
     );
 
-    // 🛠️ Depuración
-    this.debugHelper = new DebugHelper(this, Object.values(this.layers));
+    //this.debugHelper = new DebugHelper(this, Object.values(this.layers));
 
     const dialogueLayer = map.getObjectLayer('boxesd');
     if (dialogueLayer) {
-      this.dialogueTriggers = this.physics.add.group();
+      this.dialogueTriggers = this.add.group();
+      const scale = 2.5;
 
       dialogueLayer.objects.forEach((obj) => {
-        const trigger = this.physics.add
-          .sprite(obj.x * 2.5, obj.y * 2.5, null)
-          .setOrigin(0, 1)
-          .setSize(obj.width * 2.5, obj.height * 2.5)
-          .setAlpha(0) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody & {
-          dialogueKey: string;
-        };
+        const trigger = this.add.rectangle(
+          obj.x * scale + (obj.width * scale) / 2, // x + mitad del ancho escalado
+          obj.y * scale + (obj.height * scale) / 2, // y + mitad del alto escalado
+          obj.width * scale, // ancho escalado
+          obj.height * scale,
+          0x000000,
+          0 // invisible
+        ) as Phaser.GameObjects.Rectangle & { dialogueKey: string };
 
-        trigger.dialogueKey = obj.name; // <- Usa el nombre asignado en Tiled
+        this.physics.add.existing(trigger, true); // cuerpo estático
 
-        console.log(trigger);
+        const body = trigger.body as Phaser.Physics.Arcade.StaticBody;
+        // body.setSize(obj.width * 2.5, obj.height * 2.5);
+        body.setOffset(0, 0);
+
+        trigger.dialogueKey = obj.name;
 
         this.dialogueTriggers.add(trigger);
       });
 
-      this.physics.add.overlap(
+      this.currentOverlappingTriggers = new Set();
+
+      this.physics.add.collider(
         this.hero,
         this.dialogueTriggers,
-        () => this.triggerDialogue('Caja1'),
-        null,
-        this
+        (hero, trigger) => {
+          this.handleTriggerOverlap(trigger);
+        }
       );
+    }
+
+    //this.debugHelper = new DebugHelper(this, this.layers);
+
+    this.soundCaminar = this.sound.add('caminar', { volume: 10 });
+    console.log('Sonido caminar cargado:', this.soundCaminar);
+
+    this.createSoundUI();
+
+    console.log(window.localStorage.getItem('showHistory'));
+
+    if (window.localStorage.getItem('showHistory') === 'true') {
+      this.openDialogue('home', 'center');
     }
   }
 
   update() {
-    this.debugHelper.update();
+    //this.debugHelper.update();
     this.hero.move(this.cursors);
+
+    const triggersToRemove: any[] = [];
+
+    // Verifica qué triggers ya no colisionan
+    this.currentOverlappingTriggers.forEach((trigger) => {
+      if (
+        !Phaser.Geom.Intersects.RectangleToRectangle(
+          this.hero.getBounds(),
+          trigger.getBounds()
+        )
+      ) {
+        triggersToRemove.push(trigger);
+      }
+    });
+
+    // Elimina los triggers no colisionados
+    triggersToRemove.forEach((trigger) => {
+      this.currentOverlappingTriggers.delete(trigger);
+      (trigger as any).used = false;
+
+      // Si ya no hay ningún trigger activo, detén el diálogo
+      if (this.currentOverlappingTriggers.size === 0) {
+        if (this.dialog) {
+          this.dialog.destroy(false);
+          this.dialog = null;
+        }
+      }
+    });
+
+    // Control de sonido caminar
+    const moviendo =
+      this.cursors.left.isDown ||
+      this.cursors.right.isDown ||
+      this.cursors.up.isDown ||
+      this.cursors.down.isDown;
+
+    if (moviendo) {
+      if (!this.soundCaminar.isPlaying) {
+        this.soundCaminar.play({ loop: true });
+      }
+    } else {
+      if (this.soundCaminar.isPlaying) {
+        this.soundCaminar.stop();
+      }
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.teclaL)) {
+      this.someDamageFunction();
+    }
   }
 
-  triggerDialogue(trigger) {
-    const key = (trigger as any).dialogueKey || 'DefaultKey';
-    console.log(key);
+  handleTriggerOverlap(trigger) {
+    const key = trigger.dialogueKey || 'DefaultKey';
+    if (!this.currentOverlappingTriggers.has(trigger)) {
+      this.currentOverlappingTriggers.add(trigger);
+      this.openDialogue(key, 'bottom');
+    }
+  }
 
-    console.log(`Activando diálogo: ${trigger}`);
+  openDialogue(key, position: 'center' | 'bottom') {
+    if (this.dialog) {
+      //this.dialog.destroy(false);
+      this.dialog = null;
+    }
 
-    // 🔹 Aquí puedes tener un archivo con los diálogos predefinidos
-    const dialogues = {
-      Caja1: {
-        start: 'Inicio',
-        nodes: {
-          Inicio: {
-            text: '¡Encontraste una caja misteriosa!',
-            options: [
-              { text: 'Hola', next: 'Abrir' },
-              { text: 'two', next: 'Jugar' },
-            ],
-          },
-          Abrir: {
-            text: 'Dentro hay un mensaje antiguo...',
-            options: [{ text: 'Regresar', next: 'Inicio' }],
-          },
-          Jugar: {
-            text: 'Dentro hay un mensaje antiguo...',
-            options: [{ text: 'Regresar', next: 'Inicio' }],
-          },
-        },
+    this.dialog = new DialogueBox(
+      this,
+      key,
+      (stop: boolean) => {
+        if (stop) {
+          this.musicaFondo.stop();
+        }
       },
-      Caja2: {
-        start: 'Inicio',
-        nodes: {
-          Inicio: {
-            text: 'Parece que esta caja está bloqueada.',
-            options: [{ text: 'Regresar', next: 'Inicio' }],
-          },
-        },
-      },
-    };
+      position
+    );
+  }
 
-    const dialogueData = dialogues[trigger] || {
-      start: 'Inicio',
-      nodes: {
-        Inicio: {
-          text: 'Este objeto no tiene diálogo asignado.',
-          options: [{ text: 'Ok', next: 'Inicio' }],
-        },
-      },
-    };
+  private createSoundUI() {
+    let container = document.getElementById('audio-control-container');
 
-    // 🔹 Lanzar la escena de diálogo con la data correspondiente
-    this.scene.launch('DialogueScene', {
-      dialogueData: dialogueData,
-      startNode: 'Inicio',
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'audio-control-container'; // ✅ ID único para identificarlo
+      container.style.position = 'absolute';
+      container.style.top = '20px';
+      container.style.left = '20px';
+      container.style.background = 'rgba(0, 0, 0, 0.6)';
+      container.style.padding = '12px';
+      container.style.borderRadius = '10px';
+      container.style.color = 'white';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.style.fontSize = '14px';
+      container.style.zIndex = '1000';
+
+      const volMusica = (this.musicaFondo as Phaser.Sound.WebAudioSound).volume;
+      const volAmbiente = (this.soundCaminar as Phaser.Sound.WebAudioSound)
+        .volume;
+
+      container.innerHTML = `
+      <label style="display:block; margin-bottom: 10px;">🎵 Música de Fondo:
+        <input type="range" id="musicSlider" min="0" max="1" step="0.01" value="${volMusica}">
+      </label>
+      <label style="display:block;">🌿 Sonido Ambiental:
+        <input type="range" id="ambientSlider" min="0" max="1" step="0.01" value="${volAmbiente}">
+      </label>
+    `;
+
+      document.body.appendChild(container);
+
+      const musicSlider = container.querySelector(
+        '#musicSlider'
+      ) as HTMLInputElement;
+      const ambientSlider = container.querySelector(
+        '#ambientSlider'
+      ) as HTMLInputElement;
+
+      musicSlider.addEventListener('input', () => {
+        (this.musicaFondo as Phaser.Sound.WebAudioSound).setVolume(
+          parseFloat(musicSlider.value)
+        );
+      });
+
+      ambientSlider.addEventListener('input', () => {
+        (this.soundCaminar as Phaser.Sound.WebAudioSound).setVolume(
+          parseFloat(ambientSlider.value)
+        );
+      });
+    }
+
+    // Siempre agrega el atajo de teclado, pero asegura que solo oculta/muestra
+    this.input.keyboard.on('keydown-M', () => {
+      if (container) {
+        container.style.display =
+          container.style.display === 'none' ? 'block' : 'none';
+      }
     });
+  }
+
+  someDamageFunction() {
+    const newLives = 3;
+    this.header.updateLives(newLives);
   }
 }
