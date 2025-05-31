@@ -75,22 +75,81 @@ export class LifeHeader {
     });
   }
 
-  updateLives(lives: number) {
-    /*  for (let i = 0; i < this.maxLives; i++) {
-      this.hearts[i].setAlpha(i < lives ? 1 : 0.3); // vidas perdidas más opacas
-    } */
+  updateLives(): Promise<'reload' | 'close' | 'update'> {
+    return new Promise((resolve) => {
+      if (this.maxLives > 0) {
+        this.maxLives--;
+        this.hearts[this.maxLives].setTint(0x000000);
+        this.cameras.main.shake(100, 0.02);
+        //return resolve('update');
+      }
 
-    if (this.maxLives > 0) {
-      this.maxLives--;
-      // Cambiar el color del corazón perdido a negro
-      this.hearts[this.maxLives].setTint(0x000000);
-      this.cameras.main.shake(100, 0.02);
-    }
-    let click;
-    if (this.maxLives <= 0) {
+      if (this.maxLives <= 0) {
+        // Mostrar modal y PAUSAR solo después de que el DOM esté listo
+        Swal.fire({
+          title: 'Te has equivocado varias veces',
+          text: 'Debes de recolectar según el color del bote.\n¿Quieres reiniciar el juego?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Reiniciar',
+          cancelButtonText: 'Salir',
+          backdrop: false,
+          didOpen: () => {
+            // Ahora es seguro pausar
+            (this.scene as any).pauseItems?.();
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.maxLives = 3;
+            this.hearts.forEach((h) => {
+              h.setVisible(true);
+              h.clearTint();
+            });
+            (this.scene as any).resumeItems?.();
+            resolve('reload'); // ✅ Reiniciar
+          } else {
+            resolve('close'); // ❌ Salir
+            window.localStorage.setItem('showHistory', 'false');
+            /*   const manager = SceneManager.getInstance(this.scene);
+      manager.transitionTo('CutTrashScene', backScene, 'fade', 500); */
+            const pixelated =
+              this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
+
+            if (pixelated) {
+              this.scene.add.tween({
+                targets: pixelated,
+                duration: 700,
+                amount: 40,
+                onComplete: () => {
+                  this.scene.cameras.main.fadeOut(100);
+
+                  this.scene.time.delayedCall(150, () => {
+                    this.scene.scene.start(this.backScene); // <- usa el valor en option.scena
+                  });
+                },
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  updateLivses(): Promise<'reload' | 'close' | 'update'> {
+    return new Promise((resolve) => {
+      if (this.maxLives > 0) {
+        this.maxLives--;
+        this.hearts[this.maxLives].setTint(0x000000);
+        this.cameras.main.shake(100, 0.02);
+        return resolve('update'); // Sigue jugando
+      }
+
+      // Se acabaron las vidas: mostrar modal y pausar
+      (this.scene as any).pauseItems?.();
+
       Swal.fire({
         title: 'Te has equivocado varias veces',
-        text: 'Debes de recolectar segun el tipo color del bote \n ¿Quieres reiniciar el juego?',
+        text: 'Debes de recolectar según el color del bote.\n¿Quieres reiniciar el juego?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Reiniciar',
@@ -99,40 +158,16 @@ export class LifeHeader {
       }).then((result) => {
         if (result.isConfirmed) {
           this.maxLives = 3;
-          // Restaurar corazones: quitar tinte y hacer visibles
           this.hearts.forEach((h) => {
             h.setVisible(true);
             h.clearTint();
           });
-          click = 'ok';
+          resolve('reload'); // ✅ Reiniciar
         } else {
-          click = 'close';
-          const pixelated =
-            this.scene.cameras.main.postFX?.addPixelate?.(1) ?? null;
-
-          if (pixelated) {
-            this.scene.add.tween({
-              targets: pixelated,
-              duration: 700,
-              amount: 40,
-              onComplete: () => {
-                this.scene.cameras.main.fadeOut(100);
-
-                this.scene.time.delayedCall(150, () => {
-                  this.scene.scene.start(this.backScene); // <- usa el valor en option.scena
-                });
-              },
-            });
-          } else {
-            // En caso de que no exista postFX pixelate
-            this.scene.scene.start(this.backScene);
-          }
-          //this.game.destroy(true);
+          resolve('close'); // ❌ Salir
         }
       });
-      return true;
-    }
-    return click;
+    });
   }
 
   hide() {

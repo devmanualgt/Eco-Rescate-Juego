@@ -17,6 +17,7 @@ const itemConfig: Record<
   }
 > = {
   lata: { scale: 0.5, type: 'score', value: 10, tag: 'noreciclaje' },
+  diaper: { scale: 3.5, type: 'score', value: 15, tag: 'noreciclaje' },
   manzana: { scale: 0.45, type: 'score', value: 5, tag: 'organico' },
   papel: { scale: 0.6, type: 'score', value: 5, tag: 'reciclaje' },
   cheetos: { scale: 0.3, type: 'score', value: 5, tag: 'reciclaje' },
@@ -314,12 +315,9 @@ export class CutTrashScene extends Phaser.Scene {
     this.scoreText.setText(`Puntaje: ${this.points}`);
   }
 
-  someDamageFunction() {
-    const newLives = 3;
-    const shotModal = this.header.updateLives(newLives);
-    if (shotModal) {
-      this.pauseItems();
-    }
+  async someDamageFunction() {
+    const shotModal = this.header.updateLives();
+    console.log(shotModal);
   }
 
   pauseItems() {

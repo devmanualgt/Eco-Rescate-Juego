@@ -134,6 +134,7 @@ export class Preloader extends Phaser.Scene {
     this.load.image('cheetos', 'assets/ui/cheetos.png');
     this.load.image('pepsi', 'assets/ui/pepsi.png');
     this.load.image('tortix', 'assets/ui/tortix.png');
+    this.load.image('diaper', 'assets/ui/diaper.png');
 
     this.load.atlas('flares', 'assets/ui/flares.png', 'assets/ui/flares.json');
 
